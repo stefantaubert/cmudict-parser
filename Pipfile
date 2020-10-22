@@ -4,6 +4,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+autopep8 = ">=1.5.4"
+isort = ">=4.3.21"
+pycodestyle = ">=2.6.0"
+pylint = ">=2.5.3"
+rope = ">=0.17.0"
 
 [packages]
 tqdm = ">=4.46.0"

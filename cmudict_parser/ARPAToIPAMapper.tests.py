@@ -2,6 +2,7 @@ import unittest
 
 from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
 
+
 class UnitTests(unittest.TestCase):
 
   def test_UH(self):
@@ -27,6 +28,7 @@ class UnitTests(unittest.TestCase):
     res = get_ipa_with_stress(inp)
 
     self.assertEqual("ˌʊ", res)
+
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
