@@ -5,9 +5,9 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 
 from tqdm import tqdm
 
-from src.ARPAToIPAMapper import get_ipa_with_stress
-from src.CMUDictDownloader import ensure_files_are_downloaded, symbols_filename
-from src.CMUDictParser import parse
+from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
+from cmudict_parser.CMUDictDownloader import ensure_files_are_downloaded
+from cmudict_parser.CMUDictParser import parse
 
 def get_dict(download_folder: str =  "/tmp/"):
   result = CMUDict()

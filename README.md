@@ -5,12 +5,23 @@ It returns ARBAbet and IPA transciption of dictionary words.
 
 ## Installation
 
+```sh
+pip install --user pipenv
+pipenv install --ignore-pipfile
+```
+
+## Development
+
+```sh
+pip install --user pipenv
+pipenv install --dev
+```
 `pip install -r requirements.txt`
 
 ## Usage
 
 ``` python
-from src.CMUDict import get_dict
+from cmudict_parser import get_dict
 
 cmudict = get_dict()
 

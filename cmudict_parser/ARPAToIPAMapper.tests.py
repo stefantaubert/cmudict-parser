@@ -1,6 +1,6 @@
 import unittest
 
-from src.ARPAToIPAMapper import get_ipa_with_stress
+from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
 
 class UnitTests(unittest.TestCase):
 
