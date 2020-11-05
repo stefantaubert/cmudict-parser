@@ -61,6 +61,6 @@ def get_ipa_with_stress(ARPAbet_phoneme: str) -> str:
 
   if has_stress:
     ipa_stress = IPA_STRESSES[stress]
-    ipa_phon = "{}{}".format(ipa_stress, ipa_phon)
+    ipa_phon = f"{ipa_stress}{ipa_phon}"
 
   return ipa_phon

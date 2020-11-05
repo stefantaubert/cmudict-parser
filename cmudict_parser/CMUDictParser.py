@@ -3,6 +3,7 @@ adapted from https://github.com/keithito/tacotron/blob/master/text/cmudict.py
 '''
 
 import re
+from tqdm import tqdm
 from typing import Dict, List, Set, Tuple
 
 ''' Regex for alternative pronunciation '''
@@ -13,10 +14,10 @@ def parse(paths: Tuple[str, str, str]) -> Dict[str, List[str]]:
   symbols_path, _, dict_path = paths
 
   with open(symbols_path, encoding='latin-1') as f:
-    _symbols = _parse_symbols(f)
+    _symbols = _parse_symbols(f.readlines())
 
   with open(dict_path, encoding='latin-1') as f:
-    entries = _parse_cmudict(f)
+    entries = _parse_cmudict(f.readlines())
 
   assert_check_to_unknown_symbols(entries, _symbols)
 
@@ -25,14 +26,13 @@ def parse(paths: Tuple[str, str, str]) -> Dict[str, List[str]]:
 
 def _parse_cmudict(lines: List[str]) -> Dict[str, List[str]]:
   result: Dict[str, List[str]] = dict()
-  for line in lines:
+  for line in tqdm(lines):
     line_should_be_processed = _line_should_be_processed(line)
 
     if line_should_be_processed:
       _process_line(line, result)
 
   return result
-
 
 def _process_line(line: str, cmudict: Dict[str, List[str]]) -> None:
   word, pronunciation = _get_word_and_pronunciation(line)
@@ -52,7 +52,7 @@ def _get_word_and_pronunciation(line: str) -> Tuple[str, str]:
   return word, pronunciation
 
 
-def _remove_double_indicators(word):
+def _remove_double_indicators(word) -> str:
   ''' example: ABBE(1) => ABBE '''
   result = re.sub(_alt_re, '', word)
 
@@ -84,7 +84,6 @@ def assert_check_to_unknown_symbols(entries: dict, _symbols: Set[str]):
   for _, pronunciations in entries.items():
     for p in pronunciations:
       _assert_contains_no_unknown_symbols(p, _symbols)
-
 
 def _assert_contains_no_unknown_symbols(pronunciation: str, known_symbols: Set[str]) -> str:
   parts = pronunciation.split(' ')

@@ -26,7 +26,7 @@ class CMUDict():
     self._entries_first_ipa = self._extract_first_ipa()
     self._loaded = True
 
-  def _ensure_data_is_loaded(self) -> None:
+  # def _ensure_data_is_loaded(self) -> None:
     if not self._loaded:
       raise Exception("Please load the dictionary first.")
 
