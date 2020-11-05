@@ -50,5 +50,4 @@ pipenv install -e git+git@github.com:stefantaubert/cmudict-parser.git@master#egg
 
 - https://github.com/prosegrinder/python-cmudict Version 0.4.4. is newer than 0.7b!
   - has for example 'declarative' but is GPL!
-  - 
 - https://github.com/cmusphinx/cmudict Version 0.4.4.
