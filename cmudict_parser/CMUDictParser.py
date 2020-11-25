@@ -3,8 +3,9 @@ adapted from https://github.com/keithito/tacotron/blob/master/text/cmudict.py
 '''
 
 import re
-from tqdm import tqdm
 from typing import Dict, List, Set, Tuple
+
+from tqdm import tqdm
 
 ''' Regex for alternative pronunciation '''
 _alt_re = re.compile(r'\([0-9]+\)')
@@ -33,6 +34,7 @@ def _parse_cmudict(lines: List[str]) -> Dict[str, List[str]]:
       _process_line(line, result)
 
   return result
+
 
 def _process_line(line: str, cmudict: Dict[str, List[str]]) -> None:
   word, pronunciation = _get_word_and_pronunciation(line)
@@ -84,6 +86,7 @@ def assert_check_to_unknown_symbols(entries: dict, _symbols: Set[str]):
   for _, pronunciations in entries.items():
     for p in pronunciations:
       _assert_contains_no_unknown_symbols(p, _symbols)
+
 
 def _assert_contains_no_unknown_symbols(pronunciation: str, known_symbols: Set[str]) -> str:
   parts = pronunciation.split(' ')

@@ -5,8 +5,8 @@ Python parser for [CMUDict](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) files.
 ## Installation
 
 ```sh
-pip install --user pipenv --python 3.7
-pipenv install --ignore-pipfile
+python3.8 -m pip install pipenv
+python3.8 -m pipenv install --ignore-pipfile
 ```
 
 ## Usage
@@ -31,8 +31,8 @@ print(cmudict.get_first_ipa("to"))
 ## Development
 
 ```sh
-pip install --user pipenv --python 3.7
-pipenv install --dev
+python3.8 -m pip install pipenv
+python3.8 -m pipenv install --dev
 ```
 
 ### Add to other project

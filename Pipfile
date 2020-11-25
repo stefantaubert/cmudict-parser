@@ -4,15 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-autopep8 = ">=1.5.4"
-isort = ">=4.3.21"
-pycodestyle = ">=2.6.0"
-pylint = ">=2.5.3"
-rope = ">=0.17.0"
+autopep8 = "*"
+isort = "*"
+pycodestyle = "*"
+pylint = "*"
+rope = "*"
 
 [packages]
-tqdm = ">=4.46.0"
-wget = ">=3.2"
+tqdm = "*"
+wget = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"
