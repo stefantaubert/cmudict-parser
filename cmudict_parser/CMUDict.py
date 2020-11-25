@@ -3,7 +3,8 @@ Remarks:
 https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'declarative' but is has unfortunately no MIT-license.
 """
 
-from typing import Dict, List
+import string
+from typing import Callable, Dict, List, Optional, Union
 
 from tqdm import tqdm
 
@@ -16,13 +17,13 @@ class CMUDict():
   def __init__(self):
     self._loaded = False
 
-  def _load(self, dictionary_dir: str) -> None:
+  def _load(self, dictionary_dir: str, silent: bool) -> None:
     self._loaded = False
     paths = ensure_files_are_downloaded(dictionary_dir)
-    entries = parse(paths)
+    entries = parse(paths, silent)
 
     self._entries_arpa = entries
-    self._entries_ipa = self._convert_to_ipa()
+    self._entries_ipa = self._convert_to_ipa(silent)
     self._entries_first_ipa = self._extract_first_ipa()
     self._loaded = True
 
@@ -34,10 +35,10 @@ class CMUDict():
     result: Dict[str, str] = {word: ipas[0] for word, ipas in self._entries_ipa.items()}
     return result
 
-  def _convert_to_ipa(self) -> Dict[str, List[str]]:
+  def _convert_to_ipa(self, silent: bool) -> Dict[str, List[str]]:
     result: Dict[str, List[str]] = {word: [] for word, _ in self._entries_arpa.items()}
-
-    for word, pronunciations in tqdm(self._entries_arpa.items()):
+    items = self._entries_arpa.items() if silent else tqdm(self._entries_arpa.items())
+    for word, pronunciations in items:
       for pronunciation in pronunciations:
         phonemes = pronunciation.split(' ')
         ipa_phonemes = [get_ipa_with_stress(phoneme) for phoneme in phonemes]
@@ -50,6 +51,39 @@ class CMUDict():
     self._ensure_data_is_loaded()
     result = word.upper() in self._entries_arpa.keys()
     return result
+
+  def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+    if replace_unknown_with is not None and isinstance(replace_unknown_with, str) and len(replace_unknown_with) >= 2:
+      raise Exception("Parameter replace_unknown_with can only be 0 or 1 char.")
+    words = sentence.split(" ")
+    ipa_words = []
+    for word in words:
+      ipa = ""
+      if word != "":
+        if self.contains(word):
+          ipa = self.get_first_ipa(word)
+        else:
+          word_without_last_char = word[:-1]
+          last_char = word[-1]
+          last_char_is_punctuation = last_char in string.punctuation
+          add = ""
+          ipa = None
+          if last_char_is_punctuation:
+            word = word_without_last_char
+            add = last_char
+            if self.contains(word):
+              ipa = self.get_first_ipa(word) + add
+          if ipa is None:
+            if replace_unknown_with is None:
+              ipa = f"{word}{add}"
+            else:
+              if isinstance(replace_unknown_with, str):
+                ipa = f"{len(word) * replace_unknown_with}{add}"
+              else:
+                ipa = f"{replace_unknown_with(word)}{add}"
+      ipa_words.append(ipa)
+    res = " ".join(ipa_words)
+    return res
 
   def get_first_ipa(self, word: str) -> str:
     self._ensure_data_is_loaded()
@@ -68,7 +102,7 @@ class CMUDict():
     return len(self._entries_arpa)
 
 
-def get_dict(download_folder: str = "/tmp") -> CMUDict:
+def get_dict(download_folder: str = "/tmp", silent: bool = False) -> CMUDict:
   result = CMUDict()
-  result._load(download_folder)
+  result._load(download_folder, silent)
   return result

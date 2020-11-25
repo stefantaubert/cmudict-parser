@@ -11,23 +11,24 @@ from tqdm import tqdm
 _alt_re = re.compile(r'\([0-9]+\)')
 
 
-def parse(paths: Tuple[str, str, str]) -> Dict[str, List[str]]:
+def parse(paths: Tuple[str, str, str], silent: bool) -> Dict[str, List[str]]:
   symbols_path, _, dict_path = paths
 
   with open(symbols_path, encoding='latin-1') as f:
     _symbols = _parse_symbols(f.readlines())
 
   with open(dict_path, encoding='latin-1') as f:
-    entries = _parse_cmudict(f.readlines())
+    entries = _parse_cmudict(f.readlines(), silent)
 
   assert_check_to_unknown_symbols(entries, _symbols)
 
   return entries
 
 
-def _parse_cmudict(lines: List[str]) -> Dict[str, List[str]]:
+def _parse_cmudict(lines: List[str], silent: bool) -> Dict[str, List[str]]:
   result: Dict[str, List[str]] = dict()
-  for line in tqdm(lines):
+  data = lines if silent else tqdm(lines)
+  for line in data:
     line_should_be_processed = _line_should_be_processed(line)
 
     if line_should_be_processed:
