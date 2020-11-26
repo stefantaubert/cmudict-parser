@@ -83,7 +83,7 @@ class UnitTests(unittest.TestCase):
   def test_sentence_to_ipa__opening_parenthesis(self):
     res = self.cmu_dict.sentence_to_ipa("(to to", replace_unknown_with="_")
 
-    self.assertEqual("(tˈu tˈu)", res)
+    self.assertEqual("(tˈu tˈu", res)
 
   # TODO
   def test_sentence_to_ipa__minus_is_kept(self):
