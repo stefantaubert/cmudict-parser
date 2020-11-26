@@ -104,10 +104,27 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("\"tˈu", res)
 
   # TODO
+  def test_sentence_to_ipa__minus_sign_and_parenthesis(self):
+    res = self.cmu_dict.sentence_to_ipa("(to-to-to)", replace_unknown_with="_")
+
+    self.assertEqual("(tˈu-tˈu-tˈu)", res)
+
+  # TODO
+  def test_sentence_to_ipa__double_punctuation_marks(self):
+    res = self.cmu_dict.sentence_to_ipa("((to--to--to))", replace_unknown_with="_")
+
+    self.assertEqual("((tˈu--tˈu--tˈu))", res)
+
+  # TODO
   def test_sentence_to_ipa__big_letter_abbreviation(self):
     res = self.cmu_dict.sentence_to_ipa("PRS", replace_unknown_with="_")
 
     self.assertEqual("pˈiˈɑɹˈɛs", res)
+
+  def test_sentence_to_ipa__small_letter_abbreviation_is_not_replaced(self):
+    res = self.cmu_dict.sentence_to_ipa("prs", replace_unknown_with="_")
+
+    self.assertEqual("___", res)
 
 
 if __name__ == '__main__':
