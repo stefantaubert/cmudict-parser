@@ -4,6 +4,7 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 """
 
 import string
+from string import punctuation
 from typing import Callable, Dict, List, Optional, Union
 from unittest.case import skip
 
@@ -59,47 +60,53 @@ class CMUDict():
     words = sentence.split(" ")
     ipa_words = []
     for word in words:
-      ipa = ""
-      if word != "":
-        if self.contains(word):
-          ipa = self.get_first_ipa(word)
-        elif len(word)==1 and word in string.punctuation:
-          ipa = word
-        elif word.isupper():
-          for char in word:
-            ipa = ipa + self.get_first_ipa(char)
-        else:
-          word_without_last_char = word[:-1]
-          last_char = word[-1]
-          last_char_is_punctuation = last_char in string.punctuation
-          first_char = word[0]
-          first_char_is_punctuation = first_char in string.punctuation
-          add_first=""
-          add_last=""
-          if last_char_is_punctuation and first_char_is_punctuation:
-            add_first = first_char
-            add_last = last_char
-            word = word[1:-1]
-          elif last_char_is_punctuation:
-            word = word_without_last_char
-            add_last = last_char
-          elif first_char_is_punctuation:
-            word = word[1:]
-            add_first = first_char
-          ipa = None
-          if self.contains(word):
-            ipa = add_first + self.get_first_ipa(word) + add_last
-          if ipa is None:
-            if replace_unknown_with is None:
-              ipa = f"{add_first}{word}{add_last}"
-            else:
-              if isinstance(replace_unknown_with, str):
-                ipa = f"{add_first}{len(word) * replace_unknown_with}{add_last}"
-              else:
-                ipa = f"{add_first}{replace_unknown_with(word)}{add_last}"
+      if any(char in string.punctuation for char in word):
+        ipa = self.words_with_punctuation(word, replace_unknown_with)
+      else:
+        ipa = self.get_ipa_of_word_in_sentence(word, replace_unknown_with)
       ipa_words.append(ipa)
     res = " ".join(ipa_words)
     return res
+
+  def words_with_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+    if word == "":
+      return ""
+    punctuations=""
+    while word[0] in string.punctuation:
+      punctuations = punctuations + word[0]
+      word = word[1:]
+      if word == "":
+        break
+    if word != "":
+      auxiliary_word = word
+      word_without_punctuation = ""
+      while auxiliary_word[0].isalpha():
+        word_without_punctuation = word_without_punctuation + auxiliary_word[0]
+        auxiliary_word = auxiliary_word[1:]
+        if auxiliary_word == "":
+          break
+      ipa = f"{punctuations}{self.get_ipa_of_word_in_sentence(word_without_punctuation, replace_unknown_with)}{self.words_with_punctuation(auxiliary_word, replace_unknown_with)}"
+    else:
+      ipa = punctuations
+    return ipa
+
+  def get_ipa_of_word_in_sentence(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+    ipa = ""
+    if word != "":
+      if self.contains(word):
+        ipa = self.get_first_ipa(word)
+      elif word.isupper():
+        for char in word:
+          ipa = ipa + self.get_first_ipa(char)
+      else:
+        if replace_unknown_with is None:
+          ipa = word
+        else:
+          if isinstance(replace_unknown_with, str):
+            ipa = len(word) * replace_unknown_with#f"{len(word) * replace_unknown_with}"
+          else:
+            ipa = replace_unknown_with(word)
+    return ipa
 
   def get_first_ipa(self, word: str) -> str:
     self._ensure_data_is_loaded()
