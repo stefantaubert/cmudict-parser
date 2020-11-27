@@ -65,6 +65,9 @@ class CMUDict():
           ipa = self.get_first_ipa(word)
         elif len(word)==1 and word in string.punctuation:
           ipa = word
+        elif word.isupper():
+          for char in word:
+            ipa = ipa + self.get_first_ipa(char)
         else:
           word_without_last_char = word[:-1]
           last_char = word[-1]
