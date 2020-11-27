@@ -67,65 +67,65 @@ class UnitTests(unittest.TestCase):
     except Exception as e:
       self.assertEqual("Parameter replace_unknown_with can only be 0 or 1 char.", e.args[0])
 
-  # TODO
   def test_sentence_to_ipa__minus_sign(self):
     res = self.cmu_dict.sentence_to_ipa("to-to-to", replace_unknown_with="_")
 
     self.assertEqual("tˈu-tˈu-tˈu", res)
 
-  # TODO
   def test_sentence_to_ipa__closing_parenthesis(self):
     res = self.cmu_dict.sentence_to_ipa("to to)", replace_unknown_with="_")
 
     self.assertEqual("tˈu tˈu)", res)
 
-  # TODO
   def test_sentence_to_ipa__opening_parenthesis(self):
     res = self.cmu_dict.sentence_to_ipa("(to to", replace_unknown_with="_")
 
     self.assertEqual("(tˈu tˈu", res)
 
-  # TODO
   def test_sentence_to_ipa__minus_is_kept(self):
     res = self.cmu_dict.sentence_to_ipa("-", replace_unknown_with="_")
 
     self.assertEqual("-", res)
 
-  # TODO
   def test_sentence_to_ipa__single_quotation_mark_is_kept(self):
     res = self.cmu_dict.sentence_to_ipa("'to", replace_unknown_with="_")
 
     self.assertEqual("'tˈu", res)
 
-  # TODO
   def test_sentence_to_ipa__double_quotation_mark_is_kept(self):
     res = self.cmu_dict.sentence_to_ipa("\"to", replace_unknown_with="_")
 
     self.assertEqual("\"tˈu", res)
 
-  # TODO
   def test_sentence_to_ipa__minus_sign_and_parenthesis(self):
     res = self.cmu_dict.sentence_to_ipa("(to-to-to)", replace_unknown_with="_")
 
     self.assertEqual("(tˈu-tˈu-tˈu)", res)
 
-  # TODO
   def test_sentence_to_ipa__double_punctuation_marks(self):
     res = self.cmu_dict.sentence_to_ipa("((to--to--to))", replace_unknown_with="_")
 
     self.assertEqual("((tˈu--tˈu--tˈu))", res)
 
-  # TODO
   def test_sentence_to_ipa__big_letter_abbreviation(self):
     res = self.cmu_dict.sentence_to_ipa("PRS", replace_unknown_with="_")
 
     self.assertEqual("pˈiˈɑɹˈɛs", res)
+
+  def test_sentence_to_ipa__big_letter_abbreviation_with_punctuation(self):
+    res = self.cmu_dict.sentence_to_ipa("\"PRS)", replace_unknown_with="_")
+
+    self.assertEqual("\"pˈiˈɑɹˈɛs)", res)
 
   def test_sentence_to_ipa__small_letter_abbreviation_is_not_replaced(self):
     res = self.cmu_dict.sentence_to_ipa("prs", replace_unknown_with="_")
 
     self.assertEqual("___", res)
 
+  def test_sentence_to_ipa__mix_of_different_scenarios(self):
+    res = self.cmu_dict.sentence_to_ipa("((to-?PRS --to xxl))", replace_unknown_with="_")
+
+    self.assertEqual("((tˈu-?pˈiˈɑɹˈɛs --tˈu ___))", res)
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
