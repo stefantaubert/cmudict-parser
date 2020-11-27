@@ -5,6 +5,7 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 
 import string
 from typing import Callable, Dict, List, Optional, Union
+from unittest.case import skip
 
 from tqdm import tqdm
 
@@ -62,25 +63,37 @@ class CMUDict():
       if word != "":
         if self.contains(word):
           ipa = self.get_first_ipa(word)
+        elif len(word)==1 and word in string.punctuation:
+          ipa = word
         else:
           word_without_last_char = word[:-1]
           last_char = word[-1]
           last_char_is_punctuation = last_char in string.punctuation
-          add = ""
-          ipa = None
-          if last_char_is_punctuation:
+          first_char = word[0]
+          first_char_is_punctuation = first_char in string.punctuation
+          add_first=""
+          add_last=""
+          if last_char_is_punctuation and first_char_is_punctuation:
+            add_first = first_char
+            add_last = last_char
+            word = word[1:-1]
+          elif last_char_is_punctuation:
             word = word_without_last_char
-            add = last_char
-            if self.contains(word):
-              ipa = self.get_first_ipa(word) + add
+            add_last = last_char
+          elif first_char_is_punctuation:
+            word = word[1:]
+            add_first = first_char
+          ipa = None
+          if self.contains(word):
+            ipa = add_first + self.get_first_ipa(word) + add_last
           if ipa is None:
             if replace_unknown_with is None:
-              ipa = f"{word}{add}"
+              ipa = f"{add_first}{word}{add_last}"
             else:
               if isinstance(replace_unknown_with, str):
-                ipa = f"{len(word) * replace_unknown_with}{add}"
+                ipa = f"{add_first}{len(word) * replace_unknown_with}{add_last}"
               else:
-                ipa = f"{replace_unknown_with(word)}{add}"
+                ipa = f"{add_first}{replace_unknown_with(word)}{add_last}"
       ipa_words.append(ipa)
     res = " ".join(ipa_words)
     return res
