@@ -127,6 +127,30 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("((tˈu-?pˈiˈɑɹˈɛs --tˈu ___))", res)
 
+  def test_get_first_ipa__allo(self):
+    res = self.cmu_dict.get_first_ipa("'Allo")
+    self.assertEqual('ˌɑlˈoʊ', res)
+
+  def test_get_first_ipa__theyre(self):
+    res = self.cmu_dict.get_first_ipa("they're")
+    self.assertEqual('ðˈɛɹ', res)
+
+  def test_sentence_to_ipa__allo(self):
+    res = self.cmu_dict.sentence_to_ipa("'Allo", replace_unknown_with="_")
+    self.assertEqual('ˌɑlˈoʊ', res)
+
+  def test_sentence_to_ipa__theyre(self):
+    res = self.cmu_dict.sentence_to_ipa("they're", replace_unknown_with="_")
+    self.assertEqual('ðˈɛɹ', res)
+
+  def test_sentence_to_ipa__apos(self):
+    res = self.cmu_dict.sentence_to_ipa("'", replace_unknown_with="_")
+    self.assertEqual("'", res)
+
+  def test_sentence_to_ipa__sentence_with_apos(self):
+    res = self.cmu_dict.sentence_to_ipa("'Allo, to they're?", replace_unknown_with="_")
+    self.assertEqual("ˌɑlˈoʊ, tˈu ðˈɛɹ?", res)
+
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
   unittest.TextTestRunner(verbosity=2).run(suite)
