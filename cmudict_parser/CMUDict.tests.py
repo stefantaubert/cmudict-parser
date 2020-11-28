@@ -151,6 +151,14 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.sentence_to_ipa("'Allo, to they're?", replace_unknown_with="_")
     self.assertEqual("ˌɑlˈoʊ, tˈu ðˈɛɹ?", res)
 
+  def test_sentence_to_ipa__theyre_with_apos_at_beginning_and_question_mark_at_end(self):
+    res = self.cmu_dict.sentence_to_ipa("'they're?", replace_unknown_with="_")
+    self.assertEqual("'ðˈɛɹ?", res)
+
+  def test_sentence_to_ipa__allo_with_apos_at_end(self):
+    res = self.cmu_dict.sentence_to_ipa("'Allo'", replace_unknown_with="_")
+    self.assertEqual("ˌɑlˈoʊ'", res)
+
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
   unittest.TextTestRunner(verbosity=2).run(suite)

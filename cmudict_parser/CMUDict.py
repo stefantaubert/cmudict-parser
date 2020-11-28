@@ -72,7 +72,8 @@ class CMUDict():
     if word == "":
       return ""
     punctuations=""
-    while word[0] in string.punctuation:
+    punctuation_without_apostrophe=string.punctuation.replace("'","")
+    while word[0] in punctuation_without_apostrophe:
       punctuations = punctuations + word[0]
       word = word[1:]
       if word == "":
@@ -80,12 +81,19 @@ class CMUDict():
     if word != "":
       auxiliary_word = word
       word_without_punctuation = ""
-      while auxiliary_word[0].isalpha():
+      while auxiliary_word[0].isalpha() or auxiliary_word[0]=="'":
         word_without_punctuation = word_without_punctuation + auxiliary_word[0]
         auxiliary_word = auxiliary_word[1:]
         if auxiliary_word == "":
           break
-      ipa = f"{punctuations}{self.get_ipa_of_word_in_sentence(word_without_punctuation, replace_unknown_with)}{self.words_with_punctuation(auxiliary_word, replace_unknown_with)}"
+      if "'" in word_without_punctuation and not(self.contains(word_without_punctuation)):
+        for pos, char in enumerate(word_without_punctuation):
+          pass
+          #if char == "'" and self.contains():
+          #  aux_ipa = self.get_ipa_of_word_in_sentence(word_without_punctuation[0:pos], replace_unknown_with) + "'" + #self.get_ipa_of_word_in_sentence(word_without_punctuation[pos+1:], replace_unknown_with)
+          #  ipa = f"{punctuations}{aux_ipa}{self.words_with_punctuation(auxiliary_word, replace_unknown_with)}"
+      else:
+        ipa = f"{punctuations}{self.get_ipa_of_word_in_sentence(word_without_punctuation, replace_unknown_with)}{self.words_with_punctuation(auxiliary_word, replace_unknown_with)}"
     else:
       ipa = punctuations
     return ipa
