@@ -82,43 +82,43 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("(tˈu tˈu", res)
 
-  def test_sentence_to_ipa__minus_is_kept(self):
-    res = self.cmu_dict.sentence_to_ipa("-", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__minus_is_kept(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("-", replace_unknown_with="_")
 
     self.assertEqual("-", res)
 
-  def test_sentence_to_ipa__single_quotation_mark_is_kept(self):
-    res = self.cmu_dict.sentence_to_ipa("'to", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__single_quotation_mark_is_kept(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'to", replace_unknown_with="_")
 
     self.assertEqual("'tˈu", res)
 
-  def test_sentence_to_ipa__double_quotation_mark_is_kept(self):
-    res = self.cmu_dict.sentence_to_ipa("\"to", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__double_quotation_mark_is_kept(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("\"to", replace_unknown_with="_")
 
     self.assertEqual("\"tˈu", res)
 
-  def test_sentence_to_ipa__minus_sign_and_parenthesis(self):
-    res = self.cmu_dict.sentence_to_ipa("(to-to-to)", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__minus_sign_and_parenthesis(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("(to-to-to)", replace_unknown_with="_")
 
     self.assertEqual("(tˈu-tˈu-tˈu)", res)
 
-  def test_sentence_to_ipa__double_punctuation_marks(self):
-    res = self.cmu_dict.sentence_to_ipa("((to--to--to))", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__double_punctuation_marks(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("((to--to--to))", replace_unknown_with="_")
 
     self.assertEqual("((tˈu--tˈu--tˈu))", res)
 
-  def test_sentence_to_ipa__big_letter_abbreviation(self):
-    res = self.cmu_dict.sentence_to_ipa("PRS", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__big_letter_abbreviation(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("PRS", replace_unknown_with="_")
 
     self.assertEqual("pˈiˈɑɹˈɛs", res)
 
-  def test_sentence_to_ipa__big_letter_abbreviation_with_punctuation(self):
-    res = self.cmu_dict.sentence_to_ipa("\"PRS)", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__big_letter_abbreviation_with_punctuation(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("\"PRS)", replace_unknown_with="_")
 
     self.assertEqual("\"pˈiˈɑɹˈɛs)", res)
 
-  def test_sentence_to_ipa__small_letter_abbreviation_is_not_replaced(self):
-    res = self.cmu_dict.sentence_to_ipa("prs", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__small_letter_abbreviation_is_not_replaced(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("prs", replace_unknown_with="_")
 
     self.assertEqual("___", res)
 
@@ -135,29 +135,41 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.get_first_ipa("they're")
     self.assertEqual('ðˈɛɹ', res)
 
-  def test_sentence_to_ipa__allo(self):
-    res = self.cmu_dict.sentence_to_ipa("'Allo", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__allo(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'Allo", replace_unknown_with="_")
     self.assertEqual('ˌɑlˈoʊ', res)
 
-  def test_sentence_to_ipa__theyre(self):
-    res = self.cmu_dict.sentence_to_ipa("they're", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__theyre(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("they're", replace_unknown_with="_")
     self.assertEqual('ðˈɛɹ', res)
 
-  def test_sentence_to_ipa__apos(self):
-    res = self.cmu_dict.sentence_to_ipa("'", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__apos(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'", replace_unknown_with="_")
     self.assertEqual("'", res)
 
   def test_sentence_to_ipa__sentence_with_apos(self):
     res = self.cmu_dict.sentence_to_ipa("'Allo, to they're?", replace_unknown_with="_")
     self.assertEqual("ˌɑlˈoʊ, tˈu ðˈɛɹ?", res)
 
-  def test_sentence_to_ipa__theyre_with_apos_at_beginning_and_question_mark_at_end(self):
-    res = self.cmu_dict.sentence_to_ipa("'they're?", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__theyre_with_apos_at_beginning_and_question_mark_at_end(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'they're?", replace_unknown_with="_")
     self.assertEqual("'ðˈɛɹ?", res)
 
-  def test_sentence_to_ipa__allo_with_apos_at_end(self):
-    res = self.cmu_dict.sentence_to_ipa("'Allo'", replace_unknown_with="_")
+  def test_get_ipa_of_word_in_sentence__theyre_with_apos_at_beginning_and_end(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'they're'", replace_unknown_with="_")
+    self.assertEqual("'ðˈɛɹ'", res)
+
+  def test_get_ipa_of_word_in_sentence__allo_with_apos_at_end(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'Allo'", replace_unknown_with="_")
     self.assertEqual("ˌɑlˈoʊ'", res)
+
+  def test_get_ipa_of_word_in_sentence__stones_genitive(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("stones'", replace_unknown_with="_")
+    self.assertEqual("stˈoʊnz", res)
+
+  def test_get_ipa_of_word_in_sentence__stones_genitive_with_apos_at_beginning(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'stones'", replace_unknown_with="_")
+    self.assertEqual("'stˈoʊnz", res)
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)

@@ -60,45 +60,52 @@ class CMUDict():
     words = sentence.split(" ")
     ipa_words = []
     for word in words:
-      if any(char in string.punctuation for char in word):
-        ipa = self.words_with_punctuation(word, replace_unknown_with)
-      else:
-        ipa = self.get_ipa_of_word_in_sentence(word, replace_unknown_with)
+      ipa = self.get_ipa_of_word_in_sentence(word, replace_unknown_with)
       ipa_words.append(ipa)
     res = " ".join(ipa_words)
     return res
 
-  def words_with_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+  def get_ipa_of_word_in_sentence(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+      if any(char in string.punctuation for char in word):
+        ipa = self.get_ipa_of_words_with_punctuation(word, replace_unknown_with)
+      else:
+        ipa = self.get_ipa_of_word_in_sentence_without_punctuation(word, replace_unknown_with)
+      return ipa
+
+  def get_ipa_of_words_with_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     if word == "":
       return ""
-    punctuations=""
-    punctuation_without_apostrophe=string.punctuation.replace("'","")
-    while word[0] in punctuation_without_apostrophe:
-      punctuations = punctuations + word[0]
+    punctuations_before_word=""
+    while word[0] in string.punctuation:
+      punctuations_before_word = punctuations_before_word + word[0]
       word = word[1:]
       if word == "":
         break
     if word != "":
       auxiliary_word = word
       word_without_punctuation = ""
-      while auxiliary_word[0].isalpha() or auxiliary_word[0]=="'":
+      while auxiliary_word[0].isalpha() or auxiliary_word[0]=="'" or auxiliary_word[0]=="'":
         word_without_punctuation = word_without_punctuation + auxiliary_word[0]
         auxiliary_word = auxiliary_word[1:]
         if auxiliary_word == "":
           break
-      if "'" in word_without_punctuation and not(self.contains(word_without_punctuation)):
-        for pos, char in enumerate(word_without_punctuation):
-          pass
-          #if char == "'" and self.contains():
-          #  aux_ipa = self.get_ipa_of_word_in_sentence(word_without_punctuation[0:pos], replace_unknown_with) + "'" + #self.get_ipa_of_word_in_sentence(word_without_punctuation[pos+1:], replace_unknown_with)
-          #  ipa = f"{punctuations}{aux_ipa}{self.words_with_punctuation(auxiliary_word, replace_unknown_with)}"
+      char_at_end = ""
+      if word_without_punctuation[-1] == "-" or word_without_punctuation[-1] == "'":
+        char_at_end = word_without_punctuation[-1]
+        word_without_punctuation = word_without_punctuation[:-1]
+      if self.contains("'" + word_without_punctuation) and punctuations_before_word[-1] == "'":
+        punctuations_before_word = punctuations_before_word[:-1]
+        ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation("'" + word_without_punctuation, replace_unknown_with) + char_at_end
+      elif self.contains(word_without_punctuation + "'") and char_at_end == "'":
+        ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation(word_without_punctuation + "'", replace_unknown_with)
       else:
-        ipa = f"{punctuations}{self.get_ipa_of_word_in_sentence(word_without_punctuation, replace_unknown_with)}{self.words_with_punctuation(auxiliary_word, replace_unknown_with)}"
+        ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation(word_without_punctuation, replace_unknown_with) + char_at_end
+      ipa = f"{punctuations_before_word}{ipa_of_word_without_punct}{self.get_ipa_of_words_with_punctuation(auxiliary_word, replace_unknown_with)}"
     else:
-      ipa = punctuations
+      ipa = punctuations_before_word
     return ipa
 
-  def get_ipa_of_word_in_sentence(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+  def get_ipa_of_word_in_sentence_without_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     ipa = ""
     if word != "":
       if self.contains(word):
