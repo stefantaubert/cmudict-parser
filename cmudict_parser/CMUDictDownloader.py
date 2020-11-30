@@ -5,16 +5,16 @@ import wget
 
 BASE_NAME = "cmudict-0.7b"
 SYMBOLS_FILENAME = BASE_NAME + ".symbols"
-PHOES_FILENAME = BASE_NAME + ".phones"
+PHONES_FILENAME = BASE_NAME + ".phones"
 DICT_FILENAME = BASE_NAME
 BASE_URL = "http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict/"
 URL_SYMBOLS = BASE_URL + SYMBOLS_FILENAME
-URL_PHONES = BASE_URL + PHOES_FILENAME
+URL_PHONES = BASE_URL + PHONES_FILENAME
 URL_DICT = BASE_URL + DICT_FILENAME
 
 def ensure_files_are_downloaded(folder: str) -> Tuple[str, str, str]:
   symbols_path = os.path.join(folder, SYMBOLS_FILENAME)
-  phones_path = os.path.join(folder, PHOES_FILENAME)
+  phones_path = os.path.join(folder, PHONES_FILENAME)
   dict_path = os.path.join(folder, DICT_FILENAME)
 
   os.makedirs(folder, exist_ok=True)
