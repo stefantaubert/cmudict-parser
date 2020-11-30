@@ -43,7 +43,7 @@ In the destination project run:
 # if not already done:
 python3.8 -m pip install pipenv
 # add reference
-python3.8 -m pipenv install -e git+git@github.com:stefantaubert/cmudict-parser.git@master#egg=cmudict_parser
+python3.8 -m pipenv install -e git+https://github.com/stefantaubert/cmudict-parser.git@master#egg=cmudict_parser
 ```
 
 ## Notes
