@@ -76,52 +76,47 @@ class CMUDict():
     if word == "":
       return ""
     punctuations_before_word=""
-    while word[0] in string.punctuation:
-      punctuations_before_word = punctuations_before_word + word[0]
+    while word != "" and word[0] in string.punctuation:
+      punctuations_before_word += word[0]
       word = word[1:]
-      if word == "":
-        break
-    if word != "":
-      auxiliary_word = word
-      word_without_punctuation = ""
-      while auxiliary_word[0].isalpha() or auxiliary_word[0]=="'" or auxiliary_word[0]=="'":
-        word_without_punctuation = word_without_punctuation + auxiliary_word[0]
-        auxiliary_word = auxiliary_word[1:]
-        if auxiliary_word == "":
-          break
-      char_at_end = ""
-      if word_without_punctuation[-1] == "-" or word_without_punctuation[-1] == "'":
-        char_at_end = word_without_punctuation[-1]
-        word_without_punctuation = word_without_punctuation[:-1]
-      if self.contains("'" + word_without_punctuation) and punctuations_before_word[-1] == "'":
-        punctuations_before_word = punctuations_before_word[:-1]
-        ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation("'" + word_without_punctuation, replace_unknown_with) + char_at_end
-      elif self.contains(word_without_punctuation + "'") and char_at_end == "'":
-        ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation(word_without_punctuation + "'", replace_unknown_with)
-      else:
-        ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation(word_without_punctuation, replace_unknown_with) + char_at_end
-      ipa = f"{punctuations_before_word}{ipa_of_word_without_punct}{self.get_ipa_of_words_with_punctuation(auxiliary_word, replace_unknown_with)}"
+    if word == "":
+      return punctuations_before_word
+    auxiliary_word = word
+    word_without_punctuation = ""
+    while auxiliary_word != "" and (auxiliary_word[0].isalpha() or auxiliary_word[0] in "'-"):
+      word_without_punctuation += auxiliary_word[0]
+      auxiliary_word = auxiliary_word[1:]
+    char_at_end = ""
+    if word_without_punctuation[-1] in "-'":
+      char_at_end = word_without_punctuation[-1]
+      word_without_punctuation = word_without_punctuation[:-1]
+    word_with_apo_at_beginning=f"'{word_without_punctuation}"
+    word_with_apo_at_end=f"{word_without_punctuation}'"
+    if self.contains(word_with_apo_at_beginning) and punctuations_before_word[-1] == "'":
+      punctuations_before_word = punctuations_before_word[:-1]
+      ipa_of_word_without_punct = f"{self.get_ipa_of_word_in_sentence_without_punctuation(word_with_apo_at_beginning, replace_unknown_with)}{char_at_end}"
+    elif self.contains(word_with_apo_at_end) and char_at_end == "'":
+      ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation(word_with_apo_at_end, replace_unknown_with)
     else:
-      ipa = punctuations_before_word
+      ipa_of_word_without_punct = f"{self.get_ipa_of_word_in_sentence_without_punctuation(word_without_punctuation, replace_unknown_with)}{char_at_end}"
+    ipa = f"{punctuations_before_word}{ipa_of_word_without_punct}{self.get_ipa_of_words_with_punctuation(auxiliary_word, replace_unknown_with)}"
     return ipa
 
   def get_ipa_of_word_in_sentence_without_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
-    ipa = ""
-    if word != "":
-      if self.contains(word):
-        ipa = self.get_first_ipa(word)
-      elif word.isupper():
-        for char in word:
-          ipa = ipa + self.get_first_ipa(char)
-      else:
-        if replace_unknown_with is None:
-          ipa = word
-        else:
-          if isinstance(replace_unknown_with, str):
-            ipa = len(word) * replace_unknown_with#f"{len(word) * replace_unknown_with}"
-          else:
-            ipa = replace_unknown_with(word)
-    return ipa
+    if word == "":
+      return ""
+    if self.contains(word):
+      return self.get_first_ipa(word)
+    if word.isupper():
+      ipa = ""
+      for char in word:
+        ipa += self.get_first_ipa(char)
+      return ipa
+    if replace_unknown_with is None:
+      return word
+    if isinstance(replace_unknown_with, str):
+      return len(word) * replace_unknown_with
+    return replace_unknown_with(word)
 
   def get_first_ipa(self, word: str) -> str:
     self._ensure_data_is_loaded()

@@ -171,6 +171,10 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.get_ipa_of_word_in_sentence("'stones'", replace_unknown_with="_")
     self.assertEqual("'stˈoʊnz", res)
 
+  def test_get_ipa_of_word_in_sentence__no_brainer(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("no-brainer", replace_unknown_with="_")
+    self.assertEqual("nˌoʊbɹˈeɪnɝ", res)
+
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
   unittest.TextTestRunner(verbosity=2).run(suite)
