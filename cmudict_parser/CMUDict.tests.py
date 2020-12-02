@@ -156,6 +156,30 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.get_ipa_of_word_in_sentence("to-cat-o-nine-tails-to", replace_unknown_with="_")
     self.assertEqual('tˈu-kˈætoʊnˌaɪntˌeɪlz-tˈu', res)
 
+  def test_get_ipa_of_word_in_sentence__ha_ha_ha(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("ha-ha-ha", replace_unknown_with="_")
+    self.assertEqual('hˌɑhˌɑhˈɑ', res)
+
+  def test_get_ipa_of_word_in_sentence__day_by_day_to_day(self):
+    # day-by-day and day-to-day are both words in the dictionary
+    # the code should recognize day-by-day as a word and not day-to-day
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("day-by-day-to-day", replace_unknown_with="_")
+    self.assertEqual('dˈeɪbaɪdˌeɪ-tˈu-dˈeɪ', res)
+
+  def test_get_ipa_of_word_in_sentence__end_inner_quote(self):
+    # this is really in the dictionary
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'end-inner-quote", replace_unknown_with="_")
+    self.assertEqual("ˈɛndˈɪnɝkwˈoʊt", res)
+
+  def test_get_ipa_of_word_in_sentence__non_smokers(self):
+    # this is really in the dictionary
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("non-smokers'", replace_unknown_with="_")
+    self.assertEqual('nˈɑnsmˈoʊkɝz', res)
+
+  def test_get_ipa_of_word_in_sentence__cat_o_nine_tails_to_with_punctuation(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("'cat-o-nine-tails-to", replace_unknown_with="_")
+    self.assertEqual("'kˈætoʊnˌaɪntˌeɪlz-tˈu", res)
+
   def test_get_ipa_of_word_in_sentence__apos(self):
     res = self.cmu_dict.get_ipa_of_word_in_sentence("'", replace_unknown_with="_")
     self.assertEqual("'", res)

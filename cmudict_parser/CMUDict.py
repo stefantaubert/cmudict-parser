@@ -106,29 +106,29 @@ class CMUDict():
 
   def get_ipa_of_words_with_hyphen(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     parts = word.split("-")
-    for lenght_of_combination in range(len(parts), 0, -1):
-      ipa = self.combine(parts, lenght_of_combination, replace_unknown_with)
+    for length_of_combination in range(len(parts), 0, -1):
+      ipa = self.find_combination_in_dict(parts, length_of_combination, replace_unknown_with)
       if ipa is not None:
         break
     return ipa
 
-  def combine(self, parts: list[str], n, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
-    for startword_pos in range(len(parts) - n + 1):
+  def find_combination_in_dict(self, parts: list[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
+    for startword_pos in range(len(parts) - length_of_combination + 1):
       combination = parts[startword_pos]
-      for pos in range(startword_pos + 1, startword_pos + n):
+      for pos in range(startword_pos + 1, startword_pos + length_of_combination):
         combination += f"-{parts[pos]}"
       if self.contains(combination):
         if startword_pos != 0:
           word_before = parts[0]
         else:
           word_before = ""
-        if startword_pos != len(parts) - n:
-          word_after = parts[startword_pos + n]
+        if startword_pos != len(parts) - length_of_combination:
+          word_after = parts[startword_pos + length_of_combination]
         else:
           word_after = ""
         for pos_before in range(1, startword_pos):
           word_before += f"-{parts[pos_before]}"
-        for pos_after in range(startword_pos + n + 1, len(parts)):
+        for pos_after in range(startword_pos + length_of_combination + 1, len(parts)):
           word_after += f"-{parts[pos_after]}"
         if word_before != "" and word_after != "":
           ipa = f"{self.get_ipa_of_word_in_sentence(word_before, replace_unknown_with)}-{self.get_first_ipa(combination)}-{self.get_ipa_of_word_in_sentence(word_after, replace_unknown_with)}"
