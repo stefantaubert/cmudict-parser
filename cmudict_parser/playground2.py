@@ -1,6 +1,6 @@
-a="a"
-a += "b"
-print(a)
-print("-" in "-'")
+a="\n"
+for i,char in enumerate(a):
+  print(i)
 
-print(list(range(0)))
+print(len("\n"))
+print(len("123\n"))

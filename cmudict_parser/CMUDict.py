@@ -66,7 +66,7 @@ class CMUDict():
     return res
 
   def get_ipa_of_word_in_sentence(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
-      if any(char in string.punctuation for char in word):
+      if any(char in string.punctuation or char == "\n" for char in word):
         ipa = self.get_ipa_of_words_with_punctuation(word, replace_unknown_with)
       else:
         ipa = self.get_ipa_of_word_in_sentence_without_punctuation(word, replace_unknown_with)
@@ -76,7 +76,7 @@ class CMUDict():
     if word == "":
       return ""
     punctuations_before_word=""
-    while word != "" and word[0] in string.punctuation:
+    while word != "" and (word[0] in string.punctuation or word[0] =="\n"):
       punctuations_before_word += word[0]
       word = word[1:]
     if word == "":

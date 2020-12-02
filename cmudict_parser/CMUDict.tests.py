@@ -217,10 +217,17 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.sentence_to_ipa("etc.", replace_unknown_with="_")
     self.assertEqual("ˌɛtsˈɛtɝʌ.", res)
 
-  def test_sentence_to_ipa__newline_at_end(self):
+  def test_sentence_to_ipa__word_with_hyphen_and_newline_at_end(self):
     res = self.cmu_dict.sentence_to_ipa("no-brainer\n", replace_unknown_with="_")
     self.assertEqual("nˌoʊbɹˈeɪnɝ\n", res)
 
+  def test_sentence_to_ipa__normal_word_and_newline_at_end(self):
+    res = self.cmu_dict.sentence_to_ipa("no\n", replace_unknown_with="_")
+    self.assertEqual("nˈoʊ\n", res)
+
+  def test_sentence_to_ipa__normal_word_and_hyphen_and_newline_at_end(self):
+    res = self.cmu_dict.sentence_to_ipa("no-\n", replace_unknown_with="_")
+    self.assertEqual("nˈoʊ-\n", res)
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
