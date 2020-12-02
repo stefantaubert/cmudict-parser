@@ -72,6 +72,11 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("tˈu-tˈu-tˈu", res)
 
+  def test_sentence_to_ipa__minus_sign_different_words(self):
+    res = self.cmu_dict.sentence_to_ipa("to-no-so", replace_unknown_with="_")
+
+    self.assertEqual("tˈu-nˈoʊ-sˈoʊ", res)
+
   def test_sentence_to_ipa__closing_parenthesis(self):
     res = self.cmu_dict.sentence_to_ipa("to to)", replace_unknown_with="_")
 
@@ -142,6 +147,14 @@ class UnitTests(unittest.TestCase):
   def test_get_ipa_of_word_in_sentence__theyre(self):
     res = self.cmu_dict.get_ipa_of_word_in_sentence("they're", replace_unknown_with="_")
     self.assertEqual('ðˈɛɹ', res)
+
+  def test_get_ipa_of_word_in_sentence__cat_o_nine_tails(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("cat-o-nine-tails", replace_unknown_with="_")
+    self.assertEqual('kˈætoʊnˌaɪntˌeɪlz', res)
+
+  def test_get_ipa_of_word_in_sentence__to_cat_o_nine_tails_to(self):
+    res = self.cmu_dict.get_ipa_of_word_in_sentence("to-cat-o-nine-tails-to", replace_unknown_with="_")
+    self.assertEqual('tˈu-kˈætoʊnˌaɪntˌeɪlz-tˈu', res)
 
   def test_get_ipa_of_word_in_sentence__apos(self):
     res = self.cmu_dict.get_ipa_of_word_in_sentence("'", replace_unknown_with="_")

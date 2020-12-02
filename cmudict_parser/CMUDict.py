@@ -90,17 +90,56 @@ class CMUDict():
     if word_without_punctuation[-1] in "-'":
       char_at_end = word_without_punctuation[-1]
       word_without_punctuation = word_without_punctuation[:-1]
-    word_with_apo_at_beginning=f"'{word_without_punctuation}"
-    word_with_apo_at_end=f"{word_without_punctuation}'"
+    word_with_apo_at_beginning = f"'{word_without_punctuation}"
+    word_with_apo_at_end = f"{word_without_punctuation}'"
     if self.contains(word_with_apo_at_beginning) and punctuations_before_word[-1] == "'":
       punctuations_before_word = punctuations_before_word[:-1]
       ipa_of_word_without_punct = f"{self.get_ipa_of_word_in_sentence_without_punctuation(word_with_apo_at_beginning, replace_unknown_with)}{char_at_end}"
     elif self.contains(word_with_apo_at_end) and char_at_end == "'":
       ipa_of_word_without_punct = self.get_ipa_of_word_in_sentence_without_punctuation(word_with_apo_at_end, replace_unknown_with)
+    elif "-" in word_without_punctuation and not self.contains(word_without_punctuation):
+      ipa_of_word_without_punct = self.get_ipa_of_words_with_hyphen(word_without_punctuation, replace_unknown_with)
     else:
       ipa_of_word_without_punct = f"{self.get_ipa_of_word_in_sentence_without_punctuation(word_without_punctuation, replace_unknown_with)}{char_at_end}"
     ipa = f"{punctuations_before_word}{ipa_of_word_without_punct}{self.get_ipa_of_words_with_punctuation(auxiliary_word, replace_unknown_with)}"
     return ipa
+
+  def get_ipa_of_words_with_hyphen(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+    parts = word.split("-")
+    for lenght_of_combination in range(len(parts), 0, -1):
+      ipa = self.combine(parts, lenght_of_combination, replace_unknown_with)
+      if ipa is not None:
+        break
+    return ipa
+
+  def combine(self, parts: list[str], n, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
+    for startword_pos in range(len(parts) - n + 1):
+      combination = parts[startword_pos]
+      for pos in range(startword_pos + 1, startword_pos + n):
+        combination += f"-{parts[pos]}"
+      if self.contains(combination):
+        if startword_pos != 0:
+          word_before = parts[0]
+        else:
+          word_before = ""
+        if startword_pos != len(parts) - n:
+          word_after = parts[startword_pos + n]
+        else:
+          word_after = ""
+        for pos_before in range(1, startword_pos):
+          word_before += f"-{parts[pos_before]}"
+        for pos_after in range(startword_pos + n + 1, len(parts)):
+          word_after += f"-{parts[pos_after]}"
+        if word_before != "" and word_after != "":
+          ipa = f"{self.get_ipa_of_word_in_sentence(word_before, replace_unknown_with)}-{self.get_first_ipa(combination)}-{self.get_ipa_of_word_in_sentence(word_after, replace_unknown_with)}"
+        elif word_before != "":
+          ipa = f"{self.get_ipa_of_word_in_sentence(word_before, replace_unknown_with)}-{self.get_first_ipa(combination)}"
+        elif word_after != "":
+          ipa = f"{self.get_first_ipa(combination)}-{self.get_ipa_of_word_in_sentence(word_after, replace_unknown_with)}"
+        else:
+          ipa = self.get_first_ipa(combination)
+        return ipa
+    return None
 
   def get_ipa_of_word_in_sentence_without_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     if word == "":
