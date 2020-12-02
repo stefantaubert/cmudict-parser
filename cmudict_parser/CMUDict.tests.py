@@ -212,6 +212,16 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.get_ipa_of_word_in_sentence("no-brainer", replace_unknown_with="_")
     self.assertEqual("nˌoʊbɹˈeɪnɝ", res)
 
+  def test_sentence_to_ipa__etc(self):
+    # dict only contains ETC but not ETC.
+    res = self.cmu_dict.sentence_to_ipa("etc.", replace_unknown_with="_")
+    self.assertEqual("ˌɛtsˈɛtɝʌ.", res)
+
+  def test_sentence_to_ipa__newline_at_end(self):
+    res = self.cmu_dict.sentence_to_ipa("no-brainer\n", replace_unknown_with="_")
+    self.assertEqual("nˌoʊbɹˈeɪnɝ\n", res)
+
+
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
   unittest.TextTestRunner(verbosity=2).run(suite)
