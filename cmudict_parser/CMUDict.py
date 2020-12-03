@@ -146,7 +146,7 @@ class CMUDict():
       return ""
     if self.contains(word):
       return self.get_first_ipa(word)
-    if word.isupper():
+    if word.isupper() and word.isalpha():
       ipa = ""
       for char in word:
         ipa += self.get_first_ipa(char)

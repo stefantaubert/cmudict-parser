@@ -238,6 +238,7 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("_", res)
 
   def test_sentence_to_ipa__big_letter_and_number(self):
+    # should return __ as A1 is not in the dictionary (it should be treated as a single word, not like in big letter abbreviation)
     res = self.cmu_dict.sentence_to_ipa("A1", replace_unknown_with="_")
     self.assertEqual("__", res)
 
