@@ -66,11 +66,11 @@ class CMUDict():
     return res
 
   def get_ipa_of_word_in_sentence(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
-      if any(char in string.punctuation or char == "\n" for char in word):
-        ipa = self.get_ipa_of_words_with_punctuation(word, replace_unknown_with)
-      else:
-        ipa = self.get_ipa_of_word_in_sentence_without_punctuation(word, replace_unknown_with)
-      return ipa
+    if any(char in string.punctuation or char == "\n" for char in word):
+      ipa = self.get_ipa_of_words_with_punctuation(word, replace_unknown_with)
+    else:
+      ipa = self.get_ipa_of_word_in_sentence_without_punctuation(word, replace_unknown_with)
+    return ipa
 
   def get_ipa_of_words_with_punctuation(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     if word == "":
