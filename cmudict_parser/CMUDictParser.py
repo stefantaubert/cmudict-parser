@@ -83,7 +83,7 @@ def _parse_symbols(lines: List[str]) -> Set[str]:
   return symbols_as_set
 
 
-def assert_check_to_unknown_symbols(entries: Dict[str, List[str]], _symbols: Set[str]):
+def assert_check_to_unknown_symbols(entries: Dict[str, List[str]], _symbols: Set[str]) -> None:
   for _, pronunciations in entries.items():
     for p in pronunciations:
       _assert_contains_no_unknown_symbols(p, _symbols)
