@@ -4,20 +4,13 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 """
 
 import string
-from string import punctuation
-from typing import Callable, Dict, List, Optional, Union
-from unittest.case import skip
+from typing import Callable, Optional, Union
 
-from tqdm import tqdm
-
-from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
 from cmudict_parser.CMUDict import get_dict
-from cmudict_parser.CMUDictDownloader import ensure_files_are_downloaded
-from cmudict_parser.CMUDictParser import parse
 
 
 class SentenceToIPA():
-  def __init__(self, silent):#, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
+  def __init__(self, silent):
     self.cmu_dict = get_dict(silent = silent)
 
   def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
