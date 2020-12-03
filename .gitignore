@@ -130,4 +130,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-playground.*
+playground*
+
+# files containing the dictionary / its phones and symbols
+
+dicts
