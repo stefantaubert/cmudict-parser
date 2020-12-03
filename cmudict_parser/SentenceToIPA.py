@@ -72,7 +72,7 @@ class SentenceToIPA():
 
   def get_ipa_of_words_with_hyphen(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     parts = word.split("-")
-    assert parts != []
+    ipa = ""
     for length_of_combination in range(len(parts), 0, -1):
       ipa = self.find_combination_in_dict(parts, length_of_combination, replace_unknown_with)
       if ipa is not None:
