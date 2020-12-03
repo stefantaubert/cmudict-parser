@@ -1,4 +1,7 @@
-# cmudict-parser: ARPAbet and IPA for CMUDictionary
+# cmudict-parser: ARPAbet and IPA for CMU Dictionary
+
+![Python](https://img.shields.io/github/license/stefantaubert/cmudict-parser)
+![Python](https://img.shields.io/badge/python-3.9.0-green.svg)
 
 Python parser for [CMUDict](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) files. It returns ARBAbet and IPA transciption of dictionary words.
 
