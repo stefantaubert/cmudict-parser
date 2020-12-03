@@ -10,6 +10,7 @@ from tqdm import tqdm
 from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
 from cmudict_parser.CMUDictDownloader import ensure_files_are_downloaded
 from cmudict_parser.CMUDictParser import parse
+from cmudict_parser.SentenceToIPA import sentence_to_ipa
 
 
 class CMUDict():
@@ -43,8 +44,11 @@ class CMUDict():
         ipa_phonemes = [get_ipa_with_stress(phoneme) for phoneme in phonemes]
         ipa = ''.join(ipa_phonemes)
         result[word].append(ipa)
-
     return result
+
+  def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+    self._ensure_data_is_loaded()
+    return sentence_to_ipa(self._entries_first_ipa, sentence, replace_unknown_with)
 
   def contains(self, word: str) -> bool:
     self._ensure_data_is_loaded()
