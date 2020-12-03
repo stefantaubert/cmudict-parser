@@ -92,7 +92,7 @@ class CMUDict():
       word_without_punctuation = word_without_punctuation[:-1]
     word_with_apo_at_beginning = f"'{word_without_punctuation}"
     word_with_apo_at_end = f"{word_without_punctuation}'"
-    if self.contains(word_with_apo_at_beginning) and punctuations_before_word[-1] == "'":
+    if punctuations_before_word != "" and self.contains(word_with_apo_at_beginning) and punctuations_before_word[-1] == "'":
       punctuations_before_word = punctuations_before_word[:-1]
       ipa_of_word_without_punct = f"{self.get_ipa_of_word_in_sentence_without_punctuation(word_with_apo_at_beginning, replace_unknown_with)}{char_at_end}"
     elif self.contains(word_with_apo_at_end) and char_at_end == "'":
