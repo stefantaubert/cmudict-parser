@@ -9,6 +9,7 @@ isort = "*"
 pycodestyle = "*"
 pylint = "*"
 rope = "*"
+pipenv-setup = "*"
 
 [packages]
 tqdm = "*"
