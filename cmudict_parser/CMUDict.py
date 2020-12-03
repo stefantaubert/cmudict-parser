@@ -112,7 +112,7 @@ class CMUDict():
         break
     return ipa
 
-  def find_combination_in_dict(self, parts: list[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
+  def find_combination_in_dict(self, parts: List[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
     for startword_pos in range(len(parts) - length_of_combination + 1):
       combination = parts[startword_pos]
       for pos in range(startword_pos + 1, startword_pos + length_of_combination):
