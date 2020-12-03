@@ -131,3 +131,9 @@ dmypy.json
 .pyre/
 
 playground.*
+playground2.*
+
+# files containing the dictionary, its phones and symbols
+
+dicts
+hier
