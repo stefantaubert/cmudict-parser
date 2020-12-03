@@ -229,11 +229,15 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.sentence_to_ipa("no-\n", replace_unknown_with="_")
     self.assertEqual("nˈoʊ-\n", res)
 
-  def test_sentence_to_ipa__number__is_replaced(self):
+  def test_sentence_to_ipa__sentence_with_commas(self):
+    res = self.cmu_dict.sentence_to_ipa("it is not a real gain, for the modern printer throws the gain away by putting inordinately wide spaces between his lines, which, probably,", replace_unknown_with="_")
+    self.assertEqual("ˈɪt ˈɪz nˈɑt ʌ ɹˈil gˈeɪn, fˈɔɹ ðʌ mˈɑdɝn pɹˈɪntɝ θɹˈoʊz ðʌ gˈeɪn ʌwˈeɪ bˈaɪ pˈʌtɪŋ ˌɪnˈɔɹdʌnʌtli wˈaɪd spˈeɪsʌz bɪtwˈin hˈɪz lˈaɪnz, wˈɪʧ, pɹˈɑbʌblˌi,", res)
+
+  def test_sentence_to_ipa__ipa_of_number(self):
     res = self.cmu_dict.sentence_to_ipa("1", replace_unknown_with="_")
     self.assertEqual("_", res)
 
-  def test_sentence_to_ipa__number_with_letter__is_replaced(self):
+  def test_sentence_to_ipa__big_letter_and_number(self):
     res = self.cmu_dict.sentence_to_ipa("A1", replace_unknown_with="_")
     self.assertEqual("__", res)
 
