@@ -265,6 +265,24 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("nˈoʊ-\n", res)
 
+  def test_sentence_to_ipa__sentence_with_commas(self):
+    # should keep the commas and return the ipa of all the words
+    res = self.sentence_to_ipa.sentence_to_ipa("it is not a real gain, for the modern printer throws the gain away by putting inordinately wide spaces between his lines, which, probably,", replace_unknown_with="_")
+
+    self.assertEqual("ˈɪt ˈɪz nˈɑt ʌ ɹˈil gˈeɪn, fˈɔɹ ðʌ mˈɑdɝn pɹˈɪntɝ θɹˈoʊz ðʌ gˈeɪn ʌwˈeɪ bˈaɪ pˈʌtɪŋ ˌɪnˈɔɹdʌnʌtli wˈaɪd spˈeɪsʌz bɪtwˈin hˈɪz lˈaɪnz, wˈɪʧ, pɹˈɑbʌblˌi,", res)
+
+  def test_sentence_to_ipa__ipa_of_number(self):
+    # should return _, as 1 is not in the dictionary
+    res = self.sentence_to_ipa.sentence_to_ipa("1", replace_unknown_with="_")
+
+    self.assertEqual("_", res)
+
+  def test_sentence_to_ipa__big_letter_and_number(self):
+    # should return __ as A1 is not in the dictionary (it should be treated as a single word, not like in big letter abbreviation)
+    res = self.sentence_to_ipa.sentence_to_ipa("A1", replace_unknown_with="_")
+
+    self.assertEqual("__", res)
+
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
   unittest.TextTestRunner(verbosity=2).run(suite)

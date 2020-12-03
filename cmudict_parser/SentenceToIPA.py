@@ -4,7 +4,7 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 """
 
 import string
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from cmudict_parser.CMUDict import get_dict
 
@@ -51,7 +51,7 @@ class SentenceToIPA():
       word_without_punctuation = word_without_punctuation[:-1]
     word_with_apo_at_beginning = f"'{word_without_punctuation}"
     word_with_apo_at_end = f"{word_without_punctuation}'"
-    if self.cmu_dict.contains(word_with_apo_at_beginning) and punctuations_before_word[-1] == "'":
+    if punctuations_before_word != "" and self.cmu_dict.contains(word_with_apo_at_beginning) and punctuations_before_word[-1] == "'":
       punctuations_before_word = punctuations_before_word[:-1]
       ipa_of_word_without_punct = f"{self.get_ipa_of_word_in_sentence_without_punctuation(word_with_apo_at_beginning, replace_unknown_with)}{char_at_end}"
     elif self.cmu_dict.contains(word_with_apo_at_end) and char_at_end == "'":
@@ -65,14 +65,13 @@ class SentenceToIPA():
 
   def get_ipa_of_words_with_hyphen(self, word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     parts = word.split("-")
-    ipa = ""
     for length_of_combination in range(len(parts), 0, -1):
       ipa = self.find_combination_in_dict(parts, length_of_combination, replace_unknown_with)
       if ipa is not None:
         break
     return ipa
 
-  def find_combination_in_dict(self, parts: list[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
+  def find_combination_in_dict(self, parts: List[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
     for startword_pos in range(len(parts) - length_of_combination + 1):
       combination = parts[startword_pos]
       for pos in range(startword_pos + 1, startword_pos + length_of_combination):
@@ -106,7 +105,7 @@ class SentenceToIPA():
       return ""
     if self.cmu_dict.contains(word):
       return self.cmu_dict.get_first_ipa(word)
-    if word.isupper():
+    if word.isupper() and word.isalpha():
       ipa = ""
       for char in word:
         ipa += self.cmu_dict.get_first_ipa(char)
