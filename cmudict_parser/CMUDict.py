@@ -3,7 +3,7 @@ Remarks:
 https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'declarative' but is has unfortunately no MIT-license.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional, Union, Callable
 
 from tqdm import tqdm
 

@@ -45,12 +45,12 @@ def get_ipa_of_words_with_punctuation(dict: Dict[str, str], word: str, replace_u
     word_without_punctuation = word_without_punctuation[:-1]
   word_with_apo_at_beginning = f"'{word_without_punctuation}"
   word_with_apo_at_end = f"{word_without_punctuation}'"
-  if punctuations_before_word != "" and word_with_apo_at_beginning in dict and punctuations_before_word[-1] == "'":
+  if punctuations_before_word != "" and word_with_apo_at_beginning.upper() in dict and punctuations_before_word[-1] == "'":
     punctuations_before_word = punctuations_before_word[:-1]
     ipa_of_word_without_punct = f"{get_ipa_of_word_in_sentence_without_punctuation(dict, word_with_apo_at_beginning, replace_unknown_with)}{char_at_end}"
-  elif word_with_apo_at_end in dict and char_at_end == "'":
+  elif word_with_apo_at_end.upper() in dict and char_at_end == "'":
     ipa_of_word_without_punct = get_ipa_of_word_in_sentence_without_punctuation(dict, word_with_apo_at_end, replace_unknown_with)
-  elif "-" in word_without_punctuation and not word_without_punctuation in dict:
+  elif "-" in word_without_punctuation and not word_without_punctuation.upper() in dict:
     ipa_of_word_without_punct = get_ipa_of_words_with_hyphen(dict, word_without_punctuation, replace_unknown_with)
   else:
     ipa_of_word_without_punct = f"{get_ipa_of_word_in_sentence_without_punctuation(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
@@ -71,7 +71,7 @@ def find_combination_in_dict(dict: Dict[str, str], parts: List[str], length_of_c
     combination = parts[startword_pos]
     for pos in range(startword_pos + 1, startword_pos + length_of_combination):
       combination += f"-{parts[pos]}"
-    if combination in dict:
+    if combination.upper() in dict:
       if startword_pos != 0:
         word_before = parts[0]
       else:
@@ -85,21 +85,21 @@ def find_combination_in_dict(dict: Dict[str, str], parts: List[str], length_of_c
       for pos_after in range(startword_pos + length_of_combination + 1, len(parts)):
         word_after += f"-{parts[pos_after]}"
       if word_before != "" and word_after != "":
-        ipa = f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}-{dict[combination]}-{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+        ipa = f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}-{dict[combination.upper()]}-{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
       elif word_before != "":
-        ipa = f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}-{dict[combination]}"
+        ipa = f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}-{dict[combination.upper()]}"
       elif word_after != "":
-        ipa = f"{dict[combination]}-{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+        ipa = f"{dict[combination.upper()]}-{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
       else:
-        ipa = dict[combination]
+        ipa = dict[combination.upper()]
       return ipa
   return None
 
 def get_ipa_of_word_in_sentence_without_punctuation(dict: Dict[str, str], word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
   if word == "":
     return ""
-  if word in dict:
-    return dict[word]
+  if word.upper() in dict:
+    return dict[word.upper()]
   if word.isupper() and word.isalpha():
     ipa = ""
     for char in word:

@@ -2,18 +2,18 @@ import unittest
 from typing import Optional
 
 from cmudict_parser.CMUDict import CMUDict
-from cmudict_parser.SentenceToIPA import SentenceToIPA
-
-sentence_to_ipa_instance: Optional[CMUDict] = None
+from cmudict_parser.SentenceToIPA import sentence_to_ipa
 
 
 class UnitTests(unittest.TestCase):
   def __init__(self, methodName: str) -> None:
-    global sentence_to_ipa_instance
-    if sentence_to_ipa_instance is None:
-      sentence_to_ipa_instance = SentenceToIPA(silent = True)
-    self.sentence_to_ipa = sentence_to_ipa_instance
     super().__init__(methodName)
+
+  def test_sentence_to_ipa__non_smokers(self):
+    # this is really in the dictionary
+    input_dict = {"NON-SMOKERS'": "x", "NON-SMOKERS": "y"}
+    res = sentence_to_ipa(input_dict, "non-smokers'", replace_unknown_with="_")
+    self.assertEqual('x', res)
 
   def test_sentence_to_ipa_no_replace_unknown_keep_original(self):
     # should return ipa of to and keep xxl
@@ -181,11 +181,11 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("ˈɛndˈɪnɝkwˈoʊt", res)
 
-  def test_get_ipa_of_word_in_sentence__non_smokers(self):
-    # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
-    res = self.sentence_to_ipa.get_ipa_of_word_in_sentence("non-smokers'", replace_unknown_with="_")
+  # def test_get_ipa_of_word_in_sentence__non_smokers(self):
+  #   # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
+  #   res = self.sentence_to_ipa.get_ipa_of_word_in_sentence("non-smokers'", replace_unknown_with="_")
 
-    self.assertEqual('nˈɑnsmˈoʊkɝz', res)
+  #   self.assertEqual('nˈɑnsmˈoʊkɝz', res)
 
   def test_get_ipa_of_word_in_sentence__cat_o_nine_tails_to_with_punctuation(self):
     # should return apostrophe and ipa of cat-o-nine-tails-to
