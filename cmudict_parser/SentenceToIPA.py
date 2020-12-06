@@ -4,12 +4,10 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 """
 
 import string
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
 def sentence_to_ipa(dict: Dict[str, str], sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
-  if replace_unknown_with is not None and isinstance(replace_unknown_with, str) and len(replace_unknown_with) >= 2:
-    raise Exception("Parameter replace_unknown_with can only be 0 or 1 char.")
   words = sentence.split(" ")
   ipa_words = []
   for word in words:
@@ -72,41 +70,47 @@ def find_combination_in_dict(dict: Dict[str, str], parts: List[str], length_of_c
     for pos in range(startword_pos + 1, startword_pos + length_of_combination):
       combination += f"-{parts[pos]}"
     if combination.upper() in dict:
-      if startword_pos != 0:
-        word_before = parts[0]
-      else:
-        word_before = ""
-      if startword_pos != len(parts) - length_of_combination:
-        word_after = parts[startword_pos + length_of_combination]
-      else:
-        word_after = ""
-      for pos_before in range(1, startword_pos):
-        word_before += f"-{parts[pos_before]}"
-      for pos_after in range(startword_pos + length_of_combination + 1, len(parts)):
-        word_after += f"-{parts[pos_after]}"
-      if word_before != "" and word_after != "":
-        ipa = f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}-{dict[combination.upper()]}-{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
-      elif word_before != "":
-        ipa = f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}-{dict[combination.upper()]}"
-      elif word_after != "":
-        ipa = f"{dict[combination.upper()]}-{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
-      else:
-        ipa = dict[combination.upper()]
-      return ipa
+      word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos, True)
+      word_after, hyphen_after = word_and_hyphen_before_or_after(parts, startword_pos + length_of_combination, len(parts), False)
+      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination.upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
   return None
+
+def word_and_hyphen_before_or_after(parts: List[str], startpos: int, endpos: int, is_before: bool) -> Tuple[str, str]:
+  if endpos == 0 or startpos == len(parts):
+    #if (endpos == 0 and is_before) or (startpos == len(parts) and not is_before):
+    word = ""
+    hyphen = ""
+  else:
+    hyphen = "-"
+    word = parts[startpos]
+    for pos in range(startpos + 1, endpos):
+      word += f"-{parts[pos]}"
+  return word, hyphen
 
 def get_ipa_of_word_in_sentence_without_punctuation(dict: Dict[str, str], word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
   if word == "":
     return ""
   if word.upper() in dict:
     return dict[word.upper()]
-  if word.isupper() and word.isalpha():
-    ipa = ""
-    for char in word:
-      ipa += dict[char]
-    return ipa
+  if word_is_really_upper(word):
+    return big_letters_to_ipa(dict, word)
   if replace_unknown_with is None:
     return word
+  if isinstance(replace_unknown_with, str) and len(replace_unknown_with) >= 2:
+    raise Exception("Parameter replace_unknown_with can only be 0 or 1 char.")
   if isinstance(replace_unknown_with, str):
     return len(word) * replace_unknown_with
   return replace_unknown_with(word)
+
+def word_is_really_upper(word: str) -> bool:
+  return word.isupper() and word.isalpha()
+
+def big_letters_to_ipa(dict: Dict[str, str], word: str) -> str:
+  assert word_is_really_upper(word) or word == ""
+  ipa = ""
+  for char in word:
+    assert char in dict
+    ipa += dict[char]
+  return ipa
+
+
