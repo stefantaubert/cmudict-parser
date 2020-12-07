@@ -79,7 +79,7 @@ class UnitTests(unittest.TestCase):
   def test_sentence_to_ipa__too_long_replacement__throws_exception(self):
     # should throw exception
     try:
-      self.cmu_dict.sentence_to_ipa("to", replace_unknown_with="__")
+      self.cmu_dict.sentence_to_ipa("ewjoigf", replace_unknown_with="__")
       self.fail()
     except Exception as e:
       self.assertEqual("Parameter replace_unknown_with can only be 0 or 1 char.", e.args[0])

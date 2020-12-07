@@ -3,8 +3,15 @@ from typing import Optional
 
 from cmudict_parser.CMUDict import CMUDict
 from cmudict_parser.SentenceToIPA import (
-    big_letters_to_ipa, get_ipa_of_word_in_sentence_without_punctuation,
-    sentence_to_ipa, word_is_really_upper)
+    big_letters_to_ipa,
+    extract_punctuation_after_word_except_hyphen_or_apostrophe,
+    extract_punctuation_before_word,
+    find_combination_of_certain_length_in_dict, get_ipa_of_word_in_sentence,
+    get_ipa_of_word_in_sentence_without_punctuation,
+    get_ipa_of_word_with_punctuation, get_ipa_of_words_with_hyphen,
+    ipa_of_punctuation_and_words_combined, recombine_word,
+    replace_unknown_with_is_string, sentence_to_ipa,
+    word_and_hyphen_before_or_after, word_is_really_upper, word_with_apo)
 
 
 class UnitTests(unittest.TestCase):
@@ -71,13 +78,8 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("___", res)
 
-  def test_get_ipa_of_word_in_sentence_without_punctuation__word_not_in_dict_replace_unknown_with_string_with_more_than_one_char__throws_exception(self):
-    input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
-    try:
-      get_ipa_of_word_in_sentence_without_punctuation(input_dict, "prs", replace_unknown_with = "123")
-      self.fail()
-    except Exception as e:
-      self.assertEqual("Parameter replace_unknown_with can only be 0 or 1 char.", e.args[0])
+  def test_replace_unknown_with_is_string__word_not_in_dict_replace_unknown_with_string_with_more_than_one_char__throws_exception(self):
+    self.assertRaises(ValueError, replace_unknown_with_is_string, "prs", replace_unknown_with = "123")
 
   def test_get_ipa_of_word_in_sentence_without_punctuation__word_not_in_dict_replace_unknown_with_costum_func__returns_word(self):
     input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
@@ -85,281 +87,339 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("prs123", res)
 
-    # endregion
+  # endregion
 
-  # def test_sentence_to_ipa__non_smokers(self):
-  #   # this is really in the dictionary
-  #   input_dict = {"NON-SMOKERS'": "x", "NON-SMOKERS": "y"}
-  #   res = sentence_to_ipa(input_dict, "non-smokers'", replace_unknown_with="_")
-  #   self.assertEqual('x', res)
+  # region recombine_word
 
-  # def test_sentence_to_ipa_no_replace_unknown_keep_original(self):
-  #   # should return ipa of to and keep xxl
-  #   res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with=None)
+  def test_recombine_word__startpos_is_zero_endpos_is_one__returns_first_word(self):
+    parts = ["cat","o","nine","tails"]
+    res = recombine_word(parts, 0, 1)
 
-  #   self.assertEqual("tˈu tˈu. xxl xxl.", res)
+    self.assertEqual("cat", res)
 
-  # def test_sentence_to_ipa_replace_unknown_with_underscore(self):
-  #   # should return ipa of to and replace xxl with ___
-  #   res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with="_")
+  def test_recombine_word__everything_except_first_and_last_word__returns_words_in_the_middle_connected_with_hyphens(self):
+    parts = ["cat","o","nine","tails"]
+    res = recombine_word(parts, 1, len(parts)-1)
 
-  #   self.assertEqual("tˈu tˈu. ___ ___.", res)
+    self.assertEqual("o-nine", res)
 
-  # def test_sentence_to_ipa_replace_unknown_with_nothing(self):
-  #   # should return ipa of to and replace xxl with empty string (but keep space in between)
-  #   res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with="")
+  def test_recombine_word__everything_except_first_word__returns_last_three_words_connected_with_hyphens(self):
+    parts = ["cat","o","nine","tails"]
+    res = recombine_word(parts, 1, len(parts))
 
-  #   self.assertEqual("tˈu tˈu.  .", res)
+    self.assertEqual("o-nine-tails", res)
 
-  # def test_sentence_to_ipa_replace_unknown_with_custom_func(self):
-  #   # should return ipa of to and keep xxl with an added X
-  #   res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with=lambda x: x + "X")
+  # end region
 
-  #   self.assertEqual("tˈu tˈu. xxlX xxlX.", res)
+  # region word_and_hyphen_before_or_after
 
-  # def test_sentence_to_ipa__double_space__is_kept(self):
-  #   # should return ipa of to with a double space in between
-  #   res = self.cmu_dict.sentence_to_ipa("to  to", replace_unknown_with="_")
+   # should return hyphen
 
-  #   self.assertEqual("tˈu  tˈu", res)
+  def test_word_and_hyphen_before_or_after__startpos_is_zero_endpos_is_one__returns_first_word_and_hyphen(self):
+    parts = ["cat","o","nine","tails"]
+    res = word_and_hyphen_before_or_after(parts, 0, 1)
 
-  # def test_sentence_to_ipa__single_punctuation__is_kept(self):
-  #   # should return .
-  #   res = self.cmu_dict.sentence_to_ipa(".", replace_unknown_with="_")
+    self.assertEqual("cat", res[0])
+    self.assertEqual("-", res[1])
 
-  #   self.assertEqual(".", res)
+  def test_word_and_hyphen_before_or_after__everything_except_first_and_last_word__returns_words_in_the_middle_connected_with_hyphens_and_hyphen(self):
+    parts = ["cat","o","nine","tails"]
+    res = word_and_hyphen_before_or_after(parts, 1, len(parts)-1)
 
-  # def test_sentence_to_ipa__too_long_replacement__throws_exception(self):
-  #   # should throw exception
-  #   try:
-  #     self.cmu_dict.sentence_to_ipa("to", replace_unknown_with="__")
-  #     self.fail()
-  #   except Exception as e:
-  #     self.assertEqual("Parameter replace_unknown_with can only be 0 or 1 char.", e.args[0])
+    self.assertEqual("o-nine", res[0])
+    self.assertEqual("-", res[1])
 
-  # def test_sentence_to_ipa__minus_sign(self):
-  #   # should return ipa of to with hyphen in between
-  #   res = self.cmu_dict.sentence_to_ipa("to-to-to", replace_unknown_with="_")
+  def test_word_and_hyphen_before_or_after__everything_except_first_word__returns_last_three_words_connected_with_hyphens_and_hyphen(self):
+    parts = ["cat","o","nine","tails"]
+    res = word_and_hyphen_before_or_after(parts, 1, len(parts))
 
-  #   self.assertEqual("tˈu-tˈu-tˈu", res)
+    self.assertEqual("o-nine-tails", res[0])
+    self.assertEqual("-", res[1])
 
-  # def test_sentence_to_ipa__minus_sign_different_words(self):
-  #   # should return ipa of the single words with hyphen in between
-  #   res = self.cmu_dict.sentence_to_ipa("to-no-so", replace_unknown_with="_")
+   # should not return hyphen
 
-  #   self.assertEqual("tˈu-nˈoʊ-sˈoʊ", res)
+  def test_word_and_hyphen_before_or_after__endpos_is_zero__returns_empty_word_and_no_hyphen(self):
+    parts = ["cat","o","nine","tails"]
+    res = word_and_hyphen_before_or_after(parts, 1, 0)
 
-  # def test_sentence_to_ipa__closing_parenthesis(self):
-  #   # should return ipa of to with ) at end
-  #   res = self.cmu_dict.sentence_to_ipa("to to)", replace_unknown_with="_")
+    self.assertEqual("", res[0])
+    self.assertEqual("", res[1])
 
-  #   self.assertEqual("tˈu tˈu)", res)
+  def test_word_and_hyphen_before_or_after__startpos_is_length_of_list__returns_empty_word_and_no_hyphen(self):
+    parts = ["cat","o","nine","tails"]
+    res = word_and_hyphen_before_or_after(parts, len(parts), 0)
 
-  # def test_sentence_to_ipa__opening_parenthesis(self):
-  #   # should return ipa of to with ( at beginning
-  #   res = self.cmu_dict.sentence_to_ipa("(to to", replace_unknown_with="_")
+    self.assertEqual("", res[0])
+    self.assertEqual("", res[1])
 
-  #   self.assertEqual("(tˈu tˈu", res)
+  # end region
 
-  # def test_get_ipa_of_word_in_sentence__minus_is_kept(self):
-  #   # should return hyphen
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("-", replace_unknown_with="_")
+  # region find_combination_of_certain_length_in_dict
 
-  #   self.assertEqual("-", res)
+  def test_find_combination_of_certain_length_in_dict__length_too_long__returns_none(self):
+    parts = ["to", "cat", "o", "nine", "tails", "to"]
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = find_combination_of_certain_length_in_dict(input_dict, parts, 5, "_")
 
-  # def test_get_ipa_of_word_in_sentence__single_quotation_mark_is_kept(self):
-  #   # should return ipa of to with ' at beginning
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'to", replace_unknown_with="_")
+    self.assertIsNone(res)
 
-  #   self.assertEqual("'tˈu", res)
+  def test_find_combination_of_certain_length_in_dict__right_length_start_in_middle__returns_combination_of_values(self):
+    parts = ["to", "cat", "o", "nine", "tails", "to"]
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = find_combination_of_certain_length_in_dict(input_dict, parts, 4, "_")
 
-  # def test_get_ipa_of_word_in_sentence__double_quotation_mark_is_kept(self):
-  #   # should return ipa of to with \" at beginning
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("\"to", replace_unknown_with="_")
+    self.assertEqual("a-xyz-a", res)
 
-  #   self.assertEqual("\"tˈu", res)
+  def test_find_combination_of_certain_length_in_dict__right_length_start_at_beginning__returns_combination_of_values(self):
+    parts = ["cat", "o", "nine", "tails", "to"]
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = find_combination_of_certain_length_in_dict(input_dict, parts, 4, "_")
 
-  # def test_get_ipa_of_word_in_sentence__minus_sign_and_parenthesis(self):
-  #   # should return ipa of to with hyphens in between and parenthesis at beginning and end
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("(to-to-to)", replace_unknown_with="_")
+    self.assertEqual("xyz-a", res)
 
-  #   self.assertEqual("(tˈu-tˈu-tˈu)", res)
+  def test_find_combination_of_certain_length_in_dict__right_length_combination_reaches_end__returns_combination_of_values(self):
+    parts = ["to", "cat", "o", "nine", "tails"]
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = find_combination_of_certain_length_in_dict(input_dict, parts, 4, "_")
 
-  # def test_get_ipa_of_word_in_sentence__double_punctuation_marks(self):
-  #   # should return ipa of to with double hyphens in between and double parenthesis at beginning and end
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("((to--to--to))", replace_unknown_with="_")
+    self.assertEqual("a-xyz", res)
 
-  #   self.assertEqual("((tˈu--tˈu--tˈu))", res)
+  def test_find_combination_of_certain_length_in_dict__only_single_words__returns_combination_of_values(self):
+    parts = ["to", "no", "so"]
+    input_dict = {"NO": "x", "SO": "y", "TO": "z"}
+    res = find_combination_of_certain_length_in_dict(input_dict, parts, 1, "_")
 
-  # def test_get_ipa_of_word_in_sentence__big_letter_abbreviation(self):
-  #   # should return the ipa of every single letter
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("PRS", replace_unknown_with="_")
+    self.assertEqual("z-x-y", res)
 
-  #   self.assertEqual("pˈiˈɑɹˈɛs", res)
+  # endregion
 
-  # def test_get_ipa_of_word_in_sentence__big_letter_abbreviation_with_punctuation(self):
-  #   # should return the ipa of every single letter with \" at beginning
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("\"PRS)", replace_unknown_with="_")
+  # region get_ipa_of_words_with_hyphen
 
-  #   self.assertEqual("\"pˈiˈɑɹˈɛs)", res)
+  def test_get_ipa_of_words_with_hyphen__three_words__returns_combination_of_values(self):
+    input_word = "to-cat-o-nine-tails-to"
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = get_ipa_of_words_with_hyphen(input_dict, input_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__small_letter_abbreviation_is_not_replaced(self):
-  #   # should return _ for every single letter
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("prs", replace_unknown_with="_")
+    self.assertEqual("a-xyz-a", res)
 
-  #   self.assertEqual("___", res)
+  def test_get_ipa_of_words_with_hyphen__two_words_with_longer_one_at_beginning__returns_combination_of_values(self):
+    input_word = "cat-o-nine-tails-to"
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = get_ipa_of_words_with_hyphen(input_dict, input_word, "_")
 
-  # def test_sentence_to_ipa__mix_of_different_scenarios(self):
-  #   # should keep the punctuation at the corresponding places, return the ipa of to, the ipa of every single letter in PRS and replace every letter of xxl with _
-  #   res = self.cmu_dict.sentence_to_ipa("((to-?PRS --to xxl))", replace_unknown_with="_")
+    self.assertEqual("xyz-a", res)
 
-  #   self.assertEqual("((tˈu-?pˈiˈɑɹˈɛs --tˈu ___))", res)
+  def test_get_ipa_of_words_with_hyphen__two_words_with_longer_one_at_end__returns_combination_of_values(self):
+    input_word = "to-cat-o-nine-tails"
+    input_dict = {"CAT-O-NINE-TAILS": "xyz", "TO": "a"}
+    res = get_ipa_of_words_with_hyphen(input_dict, input_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__allo(self):
-  #   # should get the ipa of 'Allo, no apostrophe should be in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'Allo", replace_unknown_with="_")
+    self.assertEqual("a-xyz", res)
 
-  #   self.assertEqual('ˌɑlˈoʊ', res)
+  def test_get_ipa_of_words_with_hyphen__only_single_words__returns_combination_of_values(self):
+    input_word = "to-no-so"
+    input_dict = {"NO": "x", "SO": "y", "TO": "z"}
+    res = get_ipa_of_words_with_hyphen(input_dict, input_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__theyre(self):
-  #   # should get the ipa of they're, no apostrophe should be in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("they're", replace_unknown_with="_")
+    self.assertEqual("z-x-y", res)
 
-  #   self.assertEqual('ðˈɛɹ', res)
+  # endregion
 
-  # def test_get_ipa_of_word_in_sentence__cat_o_nine_tails(self):
-  #   # cat-o-nine-tails is really a single word in the dictionary, should return its ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("cat-o-nine-tails", replace_unknown_with="_")
+  # region word_with_apo
 
-  #   self.assertEqual('kˈætoʊnˌaɪntˌeɪlz', res)
+  def test_word_with_apo__no_apo_or_hyphen_at_end__returns_word__empty_char__and_word_with_apo_at_beginning_or_end(self):
+    input_word="stones"
+    res = word_with_apo(input_word)
 
-  # def test_get_ipa_of_word_in_sentence__to_cat_o_nine_tails_to(self):
-  #   # should return ipa of to, hyphen, ipa of cat-o-nine-tails, hyphen, ipa of to
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("to-cat-o-nine-tails-to", replace_unknown_with="_")
+    self.assertEqual(input_word, res[0])
+    self.assertEqual("", res[1])
+    self.assertEqual("'" + input_word, res[2])
+    self.assertEqual(input_word + "'", res[3])
 
-  #   self.assertEqual('tˈu-kˈætoʊnˌaɪntˌeɪlz-tˈu', res)
+  def test_word_with_apo__apo_at_end__returns_word_without_apo_at_end__apo__and_word_with_apo_at_beginning_or_end(self):
+    input_word="stones'"
+    res = word_with_apo(input_word)
 
-  # def test_get_ipa_of_word_in_sentence__ha_ha_ha(self):
-  #   # ha-ha-ha is a word in the dictionary, herefore no hyphen should appear in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("ha-ha-ha", replace_unknown_with="_")
+    self.assertEqual("stones", res[0])
+    self.assertEqual("'", res[1])
+    self.assertEqual("'stones", res[2])
+    self.assertEqual(input_word, res[3])
 
-  #   self.assertEqual('hˌɑhˌɑhˈɑ', res)
+  def test_word_with_apo__apo_at_beginning__returns_word_with_apo_at_beginning__empty_string__word_with_one_more_apo_at_beginning__and_word_with_apo_at_end(self):
+    input_word="'stones"
+    res = word_with_apo(input_word)
 
-  # def test_get_ipa_of_word_in_sentence__day_by_day_to_day(self):
-  #   # day-by-day and day-to-day are both words in the dictionary
-  #   # the code should recognize day-by-day as a word and not day-to-day
-  #   # therefore should return ipa of day-by-day (with no hyphen), hyphen, ipa of to, hyphen, ipa of day
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("day-by-day-to-day", replace_unknown_with="_")
+    self.assertEqual("'stones", res[0])
+    self.assertEqual("", res[1])
+    self.assertEqual("'" + input_word, res[2])
+    self.assertEqual(input_word + "'", res[3])
 
-  #   self.assertEqual('dˈeɪbaɪdˌeɪ-tˈu-dˈeɪ', res)
+  # end region
 
-  # def test_get_ipa_of_word_in_sentence__end_inner_quote(self):
-  #   # 'end-inner-qoute is a word in the dictionary, therefore no ' should appear in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'end-inner-quote", replace_unknown_with="_")
+  # region ipa_of_punctuation_and_words_combined
 
-  #   self.assertEqual("ˈɛndˈɪnɝkwˈoʊt", res)
+  def test_ipa_of_punctuation_and_words_combined__word_with_apo_at_beginning__returns_value_of_this_word_plus_punctutations_at_beginning_and_end_but_not_the_apo_that_belongs_to_word(self):
+    input_dict = {"ALLO": "a", "'ALLO": "b"}
+    punctuations_before_word = "$-''"
+    word_without_punctuation = "allo"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # # def test_get_ipa_of_word_in_sentence__non_smokers(self):
-  # #   # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
-  # #   res = self.cmu_dict.get_ipa_of_word_in_sentence("non-smokers'", replace_unknown_with="_")
+    self.assertEqual("$-'b+*", res)
 
-  # #   self.assertEqual('nˈɑnsmˈoʊkɝz', res)
+  def test_ipa_of_punctuation_and_words_combined__last_char_of_punctuations_before_word_is_apo_but_word_not_in_dict___returns_underlines_instead_of_word_and_keeps_punctuations(self):
+    input_dict = {"ALLO": "a", "'ALLO": "b"}
+    punctuations_before_word = "$-''"
+    word_without_punctuation = "bllo"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__cat_o_nine_tails_to_with_punctuation(self):
-  #   # should return apostrophe and ipa of cat-o-nine-tails-to
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'cat-o-nine-tails-to", replace_unknown_with="_")
+    self.assertEqual("$-''____+*", res)
 
-  #   self.assertEqual("'kˈætoʊnˌaɪntˌeɪlz-tˈu", res)
+  def test_ipa_of_punctuation_and_words_combined__word_with_apo_at_end_is_in_dict___returns_value_of_this_word_plus_punctutations_at_beginning_and_end(self):
+    input_dict = {"ALLO": "a", "'ALLO": "b", "ALLO'": "c"}
+    punctuations_before_word = "$-"
+    word_without_punctuation = "allo'"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__apos(self):
-  #   # should return apostrophe
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'", replace_unknown_with="_")
+    self.assertEqual("$-c+*", res)
 
-  #   self.assertEqual("'", res)
+  def test_ipa_of_punctuation_and_words_combined__word_has_apo_at_end_but_is_in_dict___returns_value_of_this_word_plus_punctutations_at_beginning_and_end(self):
+    input_dict = {"ALLO": "a", "'ALLO": "b"}
+    punctuations_before_word = "$-"
+    word_without_punctuation = "allo'"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_sentence_to_ipa__sentence_with_apos(self):
-  #   # all apostrophes in the sentence should not appear in the ipa as they belong to the words
-  #   res = self.cmu_dict.sentence_to_ipa("'Allo, to they're?", replace_unknown_with="_")
+    self.assertEqual("$-a'+*", res)
 
-  #   self.assertEqual("ˌɑlˈoʊ, tˈu ðˈɛɹ?", res)
+  def test_ipa_of_punctuation_and_words_combined__word_with_hyphen_and_is_in_dict___returns_value_of_this_word_plus_punctutations_at_beginning_and_end(self):
+    input_dict = {"AL-LO": "a", "AL": "b", "LO": "c"}
+    punctuations_before_word = "$-"
+    word_without_punctuation = "al-lo"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__theyre_with_apos_at_beginning_and_question_mark_at_end(self):
-  #   # should return apostrophe and ipa of they're
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'they're?", replace_unknown_with="_")
+    self.assertEqual("$-a+*", res)
 
-  #   self.assertEqual("'ðˈɛɹ?", res)
+  def test_ipa_of_punctuation_and_words_combined__word_with_hyphen_and_is_not_in_dict_but_its_parts_are___returns_value_of_the_word_parts_connected_with_hyphen_plus_punctutations_at_beginning_and_end(self):
+    input_dict = {"ALLO": "a", "AL": "b", "LO": "c"}
+    punctuations_before_word = "$-"
+    word_without_punctuation = "al-lo"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__theyre_with_apos_at_beginning_and_end(self):
-  #   # should return ipa of they're with apostrophes at beginning and end
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'they're'", replace_unknown_with="_")
+    self.assertEqual("$-b-c+*", res)
 
-  #   self.assertEqual("'ðˈɛɹ'", res)
+  def test_ipa_of_punctuation_and_words_combined__word_with_hyphen_and_is_not_in_dict_but_one_of_its_parts_are___returns_value_of_this_part_and_underlines_for_the_part_not_in_dict_connected_with_hyphen_plus_punctutations_at_beginning_and_end(self):
+    input_dict = {"ALLO": "a", "AL": "b", "O": "c"}
+    punctuations_before_word = "$-"
+    word_without_punctuation = "al-lo"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__allo_with_apos_at_end(self):
-  #   # should return ipa of 'Allo with apostrophe at end
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'Allo'", replace_unknown_with="_")
+    self.assertEqual("$-b-__+*", res)
 
-  #   self.assertEqual("ˌɑlˈoʊ'", res)
+  def test_ipa_of_punctuation_and_words_combined__normal_word_without_hyphen_or_apo___returns_value_of_word_plus_punctutations_at_beginning_and_end(self):
+    input_dict = {"ALLO": "a", "AL": "b", "O": "c"}
+    punctuations_before_word = "$-"
+    word_without_punctuation = "allo"
+    punctuations_after_word = "+*"
+    res = ipa_of_punctuation_and_words_combined(input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
 
-  # def test_get_ipa_of_word_in_sentence__stones_genitive(self):
-  #   # stones' is a word in the dictionary, no apostrophe should appear in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("stones'", replace_unknown_with="_")
+    self.assertEqual("$-a+*", res)
 
-  #   self.assertEqual("stˈoʊnz", res)
+  # end region
 
-  # def test_get_ipa_of_word_in_sentence__stones_genitive_with_apos_at_beginning(self):
-  #   # stones' is a word in the dictionary, therefore only apostrophe at beginning should appear in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("'stones'", replace_unknown_with="_")
+  # region extract_punctuation_before_word
 
-  #   self.assertEqual("'stˈoʊnz", res)
+  def test_extract_punctuation_before_word__no_punctuation_before_word__returns_input_and_empty_string(self):
+    input_word = "allo#'!"
+    res = extract_punctuation_before_word(input_word)
 
-  # def test_get_ipa_of_word_in_sentence__no_brainer(self):
-  #   # no-brainer is a word in the dictionary, therefore the hyphen should not appear in ipa
-  #   res = self.cmu_dict.get_ipa_of_word_in_sentence("no-brainer", replace_unknown_with="_")
+    self.assertEqual(input_word, res[0])
+    self.assertEqual("", res[1])
 
-  #   self.assertEqual("nˌoʊbɹˈeɪnɝ", res)
+  def test_extract_punctuation_before_word__punctuation_before_word__returns_punctuation_before_word_and_rest(self):
+    input_word = "&!allo#'!"
+    res = extract_punctuation_before_word(input_word)
 
-  # def test_sentence_to_ipa__etc(self):
-  #   # dict only contains ETC but not ETC.
-  #   res = self.cmu_dict.sentence_to_ipa("etc.", replace_unknown_with="_")
+    self.assertEqual("allo#'!", res[0])
+    self.assertEqual("&!", res[1])
 
-  #   self.assertEqual("ˌɛtsˈɛtɝʌ.", res)
+  # end region
 
-  # def test_sentence_to_ipa__word_with_hyphen_and_newline_at_end(self):
-  #   # should return ipa of no-brainer and \n at end
-  #   res = self.cmu_dict.sentence_to_ipa("no-brainer\n", replace_unknown_with="_")
+  # region extract_punctuation_after_word_except_hyphen_or_apostrophe
 
-  #   self.assertEqual("nˌoʊbɹˈeɪnɝ\n", res)
+  def test_extract_punctuation_after_word_except_hyphen_or_apostrophe__no_punctuation_after_word__returns_input_and_empty_string(self):
+    input_word = "allo"
+    res = extract_punctuation_after_word_except_hyphen_or_apostrophe(input_word)
 
-  # def test_sentence_to_ipa__normal_word_and_newline_at_end(self):
-  #   # should return ipa of no and \n at end
-  #   res = self.cmu_dict.sentence_to_ipa("no\n", replace_unknown_with="_")
+    self.assertEqual(input_word, res[0])
+    self.assertEqual("", res[1])
 
-  #   self.assertEqual("nˈoʊ\n", res)
+  def test_extract_punctuation_after_word_except_hyphen_or_apostrophe__apostrophe_after_word__returns_word_with_hyphen__and__remaining_punctuation(self):
+    input_word = "allo'!"
+    res = extract_punctuation_after_word_except_hyphen_or_apostrophe(input_word)
 
-  # def test_sentence_to_ipa__normal_word_and_hyphen_and_newline_at_end(self):
-  #   # should return ipa of no, followed by -\n
-  #   res = self.cmu_dict.sentence_to_ipa("no-\n", replace_unknown_with="_")
+    self.assertEqual("allo'", res[0])
+    self.assertEqual("!", res[1])
 
-  #   self.assertEqual("nˈoʊ-\n", res)
+  def test_extract_punctuation_after_word_except_hyphen_or_apostrophe__punctuation_after_word_but_not_hyphen_or_apostrophe__returns_word__and__punctuation(self):
+    input_word = "allo#!"
+    res = extract_punctuation_after_word_except_hyphen_or_apostrophe(input_word)
 
-  # def test_sentence_to_ipa__sentence_with_commas(self):
-  #   # should keep the commas and return the ipa of all the words
-  #   res = self.cmu_dict.sentence_to_ipa("it is not a real gain, for the modern printer throws the gain away by putting inordinately wide spaces between his lines, which, probably,", replace_unknown_with="_")
+    self.assertEqual("allo", res[0])
+    self.assertEqual("#!", res[1])
 
-  #   self.assertEqual("ˈɪt ˈɪz nˈɑt ʌ ɹˈil gˈeɪn, fˈɔɹ ðʌ mˈɑdɝn pɹˈɪntɝ θɹˈoʊz ðʌ gˈeɪn ʌwˈeɪ bˈaɪ pˈʌtɪŋ ˌɪnˈɔɹdʌnʌtli wˈaɪd spˈeɪsʌz bɪtwˈin hˈɪz lˈaɪnz, wˈɪʧ, pɹˈɑbʌblˌi,", res)
+  # end region
 
-  # def test_sentence_to_ipa__ipa_of_number(self):
-  #   # should return _, as 1 is not in the dictionary
-  #   res = self.cmu_dict.sentence_to_ipa("1", replace_unknown_with="_")
+  # region get_ipa_of_word_with_punctuation
 
-  #   self.assertEqual("_", res)
+  def test_get_ipa_of_word_with_punctuation__word_with_hyphen_that_belongs_to_word__return_value(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "A-B"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
 
-  # def test_sentence_to_ipa__big_letter_and_number(self):
-  #   # should return __ as A1 is not in the dictionary (it should be treated as a single word, not like in big letter abbreviation)
-  #   res = self.cmu_dict.sentence_to_ipa("A1", replace_unknown_with="_")
+    self.assertEqual("ab", res)
 
-  #   self.assertEqual("__", res)
+  def test_get_ipa_of_word_with_punctuation__word_with_apo_in_the_middle_that_is_not_in_dict__return_underlines(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "A'B"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
+
+    self.assertEqual("___", res)
+
+  def test_get_ipa_of_word_with_punctuation__word_with_apo_at_beginning_and_hyphen_that_belong_to_word__return_value(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "'A-B"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
+
+    self.assertEqual("g", res)
+
+  def test_get_ipa_of_word_with_punctuation__word_with_apo_atend_and_hyphen_that_belong_to_word__return_value(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "A-B'"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
+
+    self.assertEqual("h", res)
+
+  def test_get_ipa_of_word_with_punctuation__word_with_apos_at_beginning_and_end_and_hyphen_that_belong_to_word__return_value(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "'A-B'"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
+
+    self.assertEqual("i", res)
+
+  # endregion
+
+  # region get_ipa_of_word_in_sentence
+
+  def test_get_ipa_of_word_in_sentence(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "A-B"
+    res = get_ipa_of_word_in_sentence(input_dict, input_word, "_")
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
