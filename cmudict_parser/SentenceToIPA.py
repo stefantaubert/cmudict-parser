@@ -46,9 +46,12 @@ def extract_punctuation_after_word_except_hyphen_or_apostrophe(word: str) -> Tup
   return word_without_punctuation, punctuation_after_word
 
 def ipa_of_punctuation_and_words_combined(dict: Dict[str, str], punctuations_before_word: str, word_without_punctuation: str, punctuations_after_word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
-  assert word_without_punctuation != "" and word_without_punctuation[0].isalpha()
+  #assert word_without_punctuation != ""# and word_without_punctuation[0].isalpha()
   word_without_punctuation, char_at_end, word_with_apo_at_beginning, word_with_apo_at_end = word_with_apo(word_without_punctuation)
-  if punctuations_before_word != "" and word_with_apo_at_beginning.upper() in dict and punctuations_before_word[-1] == "'":
+  if punctuations_before_word != "" and punctuations_before_word[-1] == "'" and char_at_end == "'" and f"{word_with_apo_at_beginning}{char_at_end}".upper() in dict:
+    ipa_of_word_without_punct = get_ipa_of_word_in_sentence_without_punctuation(dict, f"{word_with_apo_at_beginning}{char_at_end}", replace_unknown_with)
+    punctuations_before_word = punctuations_before_word[:-1]
+  elif punctuations_before_word != "" and word_with_apo_at_beginning.upper() in dict and punctuations_before_word[-1] == "'":
     punctuations_before_word = punctuations_before_word[:-1]
     ipa_of_word_without_punct = f"{get_ipa_of_word_in_sentence_without_punctuation(dict, word_with_apo_at_beginning, replace_unknown_with)}{char_at_end}"
   elif word_with_apo_at_end.upper() in dict and char_at_end == "'":
@@ -57,7 +60,11 @@ def ipa_of_punctuation_and_words_combined(dict: Dict[str, str], punctuations_bef
     ipa_of_word_without_punct = get_ipa_of_words_with_hyphen(dict, word_without_punctuation, replace_unknown_with)
   else:
     ipa_of_word_without_punct = f"{get_ipa_of_word_in_sentence_without_punctuation(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
-  return f"{punctuations_before_word}{ipa_of_word_without_punct}{get_ipa_of_word_with_punctuation(dict, punctuations_after_word, replace_unknown_with)}"
+  if any(char.isalpha() for char in punctuations_after_word):
+    #return f"{punctuations_before_word}{ipa_of_word_without_punct}{get_ipa_of_word_in_sentence_without_punctuation(dict, punctuations_after_word, replace_unknown_with)}"
+    return f"{punctuations_before_word}{ipa_of_word_without_punct}{get_ipa_of_word_with_punctuation(dict, punctuations_after_word, replace_unknown_with)}"
+  return f"{punctuations_before_word}{ipa_of_word_without_punct}{punctuations_after_word}"
+
 
 def word_with_apo(word_without_punctuation: str):
   if word_without_punctuation[-1] in "-'":

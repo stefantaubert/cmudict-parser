@@ -377,49 +377,97 @@ class UnitTests(unittest.TestCase):
 
   # region get_ipa_of_word_with_punctuation
 
-  def test_get_ipa_of_word_with_punctuation__word_with_hyphen_that_belongs_to_word__return_value(self):
+  def test_get_ipa_of_word_with_punctuation__word_with_hyphen_that_belongs_to_word__returns_value(self):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "A-B"
     res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
 
     self.assertEqual("ab", res)
 
-  def test_get_ipa_of_word_with_punctuation__word_with_apo_in_the_middle_that_is_not_in_dict__return_underlines(self):
+  def test_get_ipa_of_word_with_punctuation__word_with_apo_in_the_middle_that_is_not_in_dict__returns_underlines(self):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "A'B"
     res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
 
     self.assertEqual("___", res)
 
-  def test_get_ipa_of_word_with_punctuation__word_with_apo_at_beginning_and_hyphen_that_belong_to_word__return_value(self):
+  def test_get_ipa_of_word_with_punctuation__word_with_apo_at_beginning_and_hyphen_that_belong_to_word__returns_value(self):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "'A-B"
     res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
 
     self.assertEqual("g", res)
 
-  def test_get_ipa_of_word_with_punctuation__word_with_apo_atend_and_hyphen_that_belong_to_word__return_value(self):
+  def test_get_ipa_of_word_with_punctuation__word_with_apo_atend_and_hyphen_that_belong_to_word__returns_value(self):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "A-B'"
     res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
 
     self.assertEqual("h", res)
 
-  def test_get_ipa_of_word_with_punctuation__word_with_apos_at_beginning_and_end_and_hyphen_that_belong_to_word__return_value(self):
+  def test_get_ipa_of_word_with_punctuation__word_with_apos_at_beginning_and_end_and_hyphen_that_belong_to_word__returns_value(self):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "'A-B'"
     res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
 
     self.assertEqual("i", res)
 
+  def test_get_ipa_of_word_with_punctuation__word_without_hyphen_or_apo_but_with_hash_and_new_line__returns_hash_value_and_new_line(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "#A\n"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
+
+    self.assertEqual("#c\n", res)
+
+  def test_get_ipa_of_word_with_punctuation__two_words_separated_by_punctuation_but_not_by_space_and_punctuation_at_beginning_and_end__returns_values_of_the_word_and_keeps_punctuation(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "#A#B#"
+    res = get_ipa_of_word_with_punctuation(input_dict, input_word, "_")
+
+    self.assertEqual("#c#d#", res)
+
   # endregion
 
   # region get_ipa_of_word_in_sentence
 
-  def test_get_ipa_of_word_in_sentence(self):
+  def test_get_ipa_of_word_in_sentence__word_without_punctuation__returns_value(self):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
-    input_word = "A-B"
+    input_word = "A"
     res = get_ipa_of_word_in_sentence(input_dict, input_word, "_")
+
+    self.assertEqual("c", res)
+
+  def test_get_ipa_of_word_in_sentence__word_with_punctuation_that_belongs_to_word__returns_value(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "'A"
+    res = get_ipa_of_word_in_sentence(input_dict, input_word, "_")
+
+    self.assertEqual("e", res)
+
+  def test_get_ipa_of_word_in_sentence__word_with_punctuation_that_belongs_not_to_word__returns_value_and_punctuation(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "-'A-"
+    res = get_ipa_of_word_in_sentence(input_dict, input_word, "_")
+
+    self.assertEqual("-e-", res)
+
+  # end region
+
+  # region sentence_to_ipa
+
+  def test_sentence_to_ipa__senrds__return_combination_of_values(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "'A-B#'"
+    res = sentence_to_ipa(input_dict, input_word, "_")
+
+    self.assertEqual("g#'", res)
+
+  def test_sentence_to_ipa__sentence_with_existing_words__return_combination_of_values(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "A B 'A A-B 'A-B' 'A-B#' A"
+    res = sentence_to_ipa(input_dict, input_word, "_")
+
+    self.assertEqual("c d e ab i g#' c", res)
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
