@@ -7,10 +7,11 @@ from cmudict_parser.SentenceToIPA import (
     extract_punctuation_after_word_except_hyphen_or_apostrophe,
     extract_punctuation_before_word,
     find_combination_of_certain_length_in_dict, get_ipa_of_word_in_sentence,
-    get_ipa_of_word_in_sentence_without_punctuation,
-    get_ipa_of_word_with_punctuation, get_ipa_of_words_with_hyphen,
-    ipa_of_punctuation_and_words_combined, recombine_word,
-    replace_unknown_with_is_string, sentence_to_ipa,
+    get_ipa_of_word_with_punctuation,
+    get_ipa_of_word_without_punctuation_or_unknown_words,
+    get_ipa_of_words_with_hyphen, ipa_of_punctuation_and_words_combined,
+    recombine_word, replace_unknown_with_is_string, sentence_to_ipa,
+    value_depending_on_is_alphabetic_value_in_punctuations_after_word,
     word_and_hyphen_before_or_after, word_is_really_upper, word_with_apo)
 
 
@@ -52,38 +53,38 @@ class UnitTests(unittest.TestCase):
 
   #endregion
 
-  # region get_ipa_of_word_in_sentence_without_punctuation
+  # region get_ipa_of_word_without_punctuation_or_unknown_words
 
-  def test_get_ipa_of_word_in_sentence_without_punctuation__word_in_dict__returns_value(self):
+  def test_get_ipa_of_word_without_punctuation_or_unknown_words__word_in_dict__returns_value(self):
     input_dict = {"PRS": "abc", "P": "x", "R": "y", "S": "z"}
-    res = get_ipa_of_word_in_sentence_without_punctuation(input_dict, "PRS", replace_unknown_with = "_")
+    res = get_ipa_of_word_without_punctuation_or_unknown_words(input_dict, "PRS", replace_unknown_with = "_")
 
     self.assertEqual("abc", res)
 
-  def test_get_ipa_of_word_in_sentence_without_punctuation__word_not_in_dict_with_only_upper_letters__returns_combination_of_values(self):
+  def test_get_ipa_of_word_without_punctuation_or_unknown_words__word_not_in_dict_with_only_upper_letters__returns_combination_of_values(self):
     input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
-    res = get_ipa_of_word_in_sentence_without_punctuation(input_dict, "PRS", replace_unknown_with = "_")
+    res = get_ipa_of_word_without_punctuation_or_unknown_words(input_dict, "PRS", replace_unknown_with = "_")
 
     self.assertEqual("xyz", res)
 
-  def test_get_ipa_of_word_in_sentence_without_punctuation__word_not_in_dict_replace_unknown_with_None__returns_word(self):
+  def test_get_ipa_of_word_without_punctuation_or_unknown_words__word_not_in_dict_replace_unknown_with_None__returns_word(self):
     input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
-    res = get_ipa_of_word_in_sentence_without_punctuation(input_dict, "prs", replace_unknown_with = None)
+    res = get_ipa_of_word_without_punctuation_or_unknown_words(input_dict, "prs", replace_unknown_with = None)
 
     self.assertEqual("prs", res)
 
-  def test_get_ipa_of_word_in_sentence_without_punctuation__word_not_in_dict_replace_unknown_with_underline__returns_word(self):
+  def test_get_ipa_of_word_without_punctuation_or_unknown_words__word_not_in_dict_replace_unknown_with_underline__returns_word(self):
     input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
-    res = get_ipa_of_word_in_sentence_without_punctuation(input_dict, "prs", replace_unknown_with = "_")
+    res = get_ipa_of_word_without_punctuation_or_unknown_words(input_dict, "prs", replace_unknown_with = "_")
 
     self.assertEqual("___", res)
 
-  def test_replace_unknown_with_is_string__word_not_in_dict_replace_unknown_with_string_with_more_than_one_char__throws_exception(self):
+  def test_get_ipa_of_word_without_punctuation_or_unknown_words__replace_unknown_with_string_with_more_than_one_char_and_word_not_in_dict__throws_exception(self):
     self.assertRaises(ValueError, replace_unknown_with_is_string, "prs", replace_unknown_with = "123")
 
-  def test_get_ipa_of_word_in_sentence_without_punctuation__word_not_in_dict_replace_unknown_with_costum_func__returns_word(self):
+  def test_gget_ipa_of_word_without_punctuation_or_unknown_words__word_not_in_dict_replace_unknown_with_costum_func__returns_word(self):
     input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
-    res = get_ipa_of_word_in_sentence_without_punctuation(input_dict, "prs", replace_unknown_with = lambda x: x + "123")
+    res = get_ipa_of_word_without_punctuation_or_unknown_words(input_dict, "prs", replace_unknown_with = lambda x: x + "123")
 
     self.assertEqual("prs123", res)
 
@@ -109,7 +110,7 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("o-nine-tails", res)
 
-  # end region
+  # endregion
 
   # region word_and_hyphen_before_or_after
 
@@ -152,7 +153,7 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("", res[0])
     self.assertEqual("", res[1])
 
-  # end region
+  # endregion
 
   # region find_combination_of_certain_length_in_dict
 
@@ -225,6 +226,40 @@ class UnitTests(unittest.TestCase):
 
   # endregion
 
+  # region value_depending_on_is_alphabetic_value_in_punctuations_after_word
+
+  def test_value_depending_on_is_alphabetic_value_in_punctuations_after_word__word_with_alphabetic_values_in_punctuations_after_word_which_are_not_in_dict__returns_input_ipa_and_first_char_of_punctuations_after_word_and_underlines_for_rest(self):
+    input_dict = {"A": "e", "B": "f", "C": "g"}
+    punctuation_before_word = ""
+    ipa_of_word_without_punctuation = "abc"
+    punctuations_after_word = "#abc"
+
+    res = value_depending_on_is_alphabetic_value_in_punctuations_after_word(input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuations_after_word, "_")
+
+    self.assertEqual("abc#___", res)
+
+  def test_value_depending_on_is_alphabetic_value_in_punctuations_after_word__word_with_alphabetic_values_in_punctuations_after_word_which_are_in_dict__returns_input_ipa_and_first_char_of_punctuations_after_word_and_ipa_of_upper_letters(self):
+    input_dict = {"A": "e", "B": "f", "C": "g"}
+    punctuation_before_word = ""
+    ipa_of_word_without_punctuation = "abc"
+    punctuations_after_word = "#ABC"
+
+    res = value_depending_on_is_alphabetic_value_in_punctuations_after_word(input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuations_after_word, "_")
+
+    self.assertEqual("abc#efg", res)
+
+  def test_value_depending_on_is_alphabetic_value_in_punctuations_after_word__word_without_alphabetic_values_in_punctuations_after_word__returns_input_ipa_and_keeps_punctuations_after_word_as_they_are(self):
+    input_dict = {"A": "e", "B": "f", "C": "d"}
+    punctuation_before_word = ""
+    ipa_of_word_without_punctuation = "abc"
+    punctuations_after_word = "#!'-'"
+
+    res = value_depending_on_is_alphabetic_value_in_punctuations_after_word(input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuations_after_word, "_")
+
+    self.assertEqual("abc#!'-'", res)
+
+  # endregion
+
   # region word_with_apo
 
   def test_word_with_apo__no_apo_or_hyphen_at_end__returns_word__empty_char__and_word_with_apo_at_beginning_or_end(self):
@@ -254,7 +289,7 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("'" + input_word, res[2])
     self.assertEqual(input_word + "'", res[3])
 
-  # end region
+  # endregion
 
   # region ipa_of_punctuation_and_words_combined
 
@@ -330,7 +365,7 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("$-a+*", res)
 
-  # end region
+  # endregion
 
   # region extract_punctuation_before_word
 
@@ -348,7 +383,7 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("allo#'!", res[0])
     self.assertEqual("&!", res[1])
 
-  # end region
+  # endregion
 
   # region extract_punctuation_after_word_except_hyphen_or_apostrophe
 
@@ -373,7 +408,7 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("allo", res[0])
     self.assertEqual("#!", res[1])
 
-  # end region
+  # endregion
 
   # region get_ipa_of_word_with_punctuation
 
@@ -451,7 +486,7 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("-e-", res)
 
-  # end region
+  # endregion
 
   # region sentence_to_ipa
 
@@ -475,6 +510,8 @@ class UnitTests(unittest.TestCase):
     res = sentence_to_ipa(input_dict, input_word, "_")
 
     self.assertEqual("___ dc", res)
+
+  # endregion
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
