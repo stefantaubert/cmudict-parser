@@ -206,11 +206,11 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("ˈɛndˈɪnɝkwˈoʊt", res)
 
-  # def test_sentence_to_ipa__non_smokers(self):
-  #   # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
-  #   res = self.cmu_dict.sentence_to_ipa("non-smokers'", replace_unknown_with="_")
+  def test_sentence_to_ipa__non_smokers(self):
+   # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
+   res = self.cmu_dict.sentence_to_ipa("non-smokers'", replace_unknown_with="_")
 
-  #   self.assertEqual('nˈɑnsmˈoʊkɝz', res)
+   self.assertEqual('nˈɑnsmˈoʊkɝz', res)
 
   def test_sentence_to_ipa__cat_o_nine_tails_to_with_punctuation(self):
     # should return apostrophe and ipa of cat-o-nine-tails-to
