@@ -469,6 +469,13 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("c d e ab i g#' c", res)
 
+  def test_sentence_to_ipa__sentence_with_words_not_in_dict_but_one_of_them_is_only_in_capital_letters__return_underlines_and_values_for_letters(self):
+    input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e", "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
+    input_word = "abc BA"
+    res = sentence_to_ipa(input_dict, input_word, "_")
+
+    self.assertEqual("___ dc", res)
+
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
   unittest.TextTestRunner(verbosity=2).run(suite)
