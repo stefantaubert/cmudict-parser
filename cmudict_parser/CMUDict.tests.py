@@ -34,12 +34,6 @@ class UnitTests(unittest.TestCase):
     res = self.cmu_dict.get_first_ipa("'Allo")
     self.assertEqual('ˌɑlˈoʊ', res)
 
-  '''def test_sentence_to_ipa__non_smokers(self):
-    # this is really in the dictionary
-    input_dict = {"NON-SMOKERS'": "x", "NON-SMOKERS": "y"}
-    res = sentence_to_ipa(input_dict, "non-smokers'", replace_unknown_with="_")
-    self.assertEqual('x', res)'''
-
   def test_sentence_to_ipa_no_replace_unknown_keep_original(self):
     # should return ipa of to and keep xxl
     res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with=None)

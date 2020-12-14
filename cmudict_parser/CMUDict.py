@@ -3,14 +3,14 @@ Remarks:
 https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'declarative' but is has unfortunately no MIT-license.
 """
 
-from typing import Dict, List, Optional, Union, Callable
+from typing import Callable, Dict, List, Optional, Union
 
 from tqdm import tqdm
 
 from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
 from cmudict_parser.CMUDictDownloader import ensure_files_are_downloaded
 from cmudict_parser.CMUDictParser import parse
-from cmudict_parser.SentenceToIPA import sentence_to_ipa
+from cmudict_parser.SentenceToIPA import sentence_to_ipa as get_ipa_of_sentence
 
 
 class CMUDict():
@@ -48,7 +48,7 @@ class CMUDict():
 
   def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
     self._ensure_data_is_loaded()
-    return sentence_to_ipa(self._entries_first_ipa, sentence, replace_unknown_with)
+    return get_ipa_of_sentence(self._entries_first_ipa, sentence, replace_unknown_with)
 
   def contains(self, word: str) -> bool:
     self._ensure_data_is_loaded()

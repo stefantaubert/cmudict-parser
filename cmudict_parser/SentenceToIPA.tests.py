@@ -266,28 +266,34 @@ class UnitTests(unittest.TestCase):
     input_word="stones"
     res = word_with_apo(input_word)
 
+    self.assertEqual(5, len(res))
     self.assertEqual(input_word, res[0])
     self.assertEqual("", res[1])
     self.assertEqual("'" + input_word, res[2])
     self.assertEqual(input_word + "'", res[3])
+    self.assertEqual("'" + input_word + "'", res[4])
 
   def test_word_with_apo__apo_at_end__returns_word_without_apo_at_end__apo__and_word_with_apo_at_beginning_or_end(self):
     input_word="stones'"
     res = word_with_apo(input_word)
 
+    self.assertEqual(5, len(res))
     self.assertEqual("stones", res[0])
     self.assertEqual("'", res[1])
     self.assertEqual("'stones", res[2])
     self.assertEqual(input_word, res[3])
+    self.assertEqual("'" + input_word, res[4])
 
   def test_word_with_apo__apo_at_beginning__returns_word_with_apo_at_beginning__empty_string__word_with_one_more_apo_at_beginning__and_word_with_apo_at_end(self):
     input_word="'stones"
     res = word_with_apo(input_word)
 
+    self.assertEqual(5, len(res))
     self.assertEqual("'stones", res[0])
     self.assertEqual("", res[1])
     self.assertEqual("'" + input_word, res[2])
     self.assertEqual(input_word + "'", res[3])
+    self.assertEqual("'" + input_word + "'", res[4])
 
   # endregion
 

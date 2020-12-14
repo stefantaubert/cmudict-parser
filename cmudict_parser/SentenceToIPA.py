@@ -6,18 +6,17 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 import string
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
+PUNCTUATONS_AND_LINEBREAK = string.punctuation + "\n"
+
 
 def sentence_to_ipa(dict: Dict[str, str], sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
   words = sentence.split(" ")
-  ipa_words = []
-  for word in words:
-    ipa = get_ipa_of_word_in_sentence(dict, word, replace_unknown_with)
-    ipa_words.append(ipa)
+  ipa_words = [get_ipa_of_word_in_sentence(dict, word, replace_unknown_with) for word in words]
   res = " ".join(ipa_words)
   return res
 
 def get_ipa_of_word_in_sentence(dict: Dict[str, str], word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
-  if any(char in string.punctuation or char == "\n" for char in word):
+  if any(char in PUNCTUATONS_AND_LINEBREAK for char in word):
     ipa = get_ipa_of_word_with_punctuation(dict, word, replace_unknown_with)
   else:
     ipa = get_ipa_of_word_without_punctuation_or_unknown_words(dict, word, replace_unknown_with)
@@ -32,7 +31,7 @@ def get_ipa_of_word_with_punctuation(dict: Dict[str, str], word: str, replace_un
 
 def extract_punctuation_before_word(word: str) -> Tuple[str, str]:
   punctuations_before_word = ""
-  while word != "" and (word[0] in string.punctuation or word[0] =="\n"):
+  while word != "" and (word[0] in PUNCTUATONS_AND_LINEBREAK):
     punctuations_before_word += word[0]
     word = word[1:]
   return word, punctuations_before_word
@@ -62,7 +61,7 @@ def ipa_of_punctuation_and_words_combined(dict: Dict[str, str], punctuations_bef
     ipa_of_word_without_punct = f"{get_ipa_of_word_without_punctuation_or_unknown_words(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
   return value_depending_on_is_alphabetic_value_in_punctuations_after_word(dict, punctuations_before_word, ipa_of_word_without_punct, punctuations_after_word, replace_unknown_with)
 
-def word_with_apo(word_without_punctuation: str):
+def word_with_apo(word_without_punctuation: str) -> Tuple[str, str, str, str, str]:
   if word_without_punctuation[-1] in "-'":
     return word_without_punctuation[:-1], word_without_punctuation[-1], f"'{word_without_punctuation[:-1]}", f"{word_without_punctuation[:-1]}'", f"'{word_without_punctuation[:-1]}'"
   return word_without_punctuation, "", f"'{word_without_punctuation}", f"{word_without_punctuation}'", f"'{word_without_punctuation}'"
@@ -79,9 +78,10 @@ def get_ipa_of_words_with_hyphen(dict: Dict[str, str], word: str, replace_unknow
     ipa = find_combination_of_certain_length_in_dict(dict, parts, length_of_combination, replace_unknown_with)
     if ipa is not None:
       break
+  assert ipa is not None
   return ipa
 
-def find_combination_of_certain_length_in_dict(dict: Dict[str, str], parts: List[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]):
+def find_combination_of_certain_length_in_dict(dict: Dict[str, str], parts: List[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> Optional[str]:
   assert all_keys_are_upper(dict)
   for startword_pos in range(len(parts) - length_of_combination + 1):
     combination = recombine_word(parts, startword_pos, startword_pos + length_of_combination)
@@ -98,9 +98,8 @@ def word_and_hyphen_before_or_after(parts: List[str], startpos: int, endpos: int
 
 def recombine_word(parts: List[str], startpos: int, endpos: int) -> str:
   assert startpos >= 0 and startpos < endpos and endpos <= len(parts)
-  word = parts[startpos]
-  for pos in range(startpos + 1, endpos):
-    word += f"-{parts[pos]}"
+  parts = parts[startpos:endpos]
+  word = "-".join(parts)
   return word
 
 def get_ipa_of_word_without_punctuation_or_unknown_words(dict: Dict[str, str], word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
