@@ -34,6 +34,7 @@ print(cmudict.get_first_ipa("to"))
 ## Development
 
 ```sh
+apt install python3-lib2to3
 python3.8 -m pip install pipenv
 python3.8 -m pipenv install --dev
 ```
