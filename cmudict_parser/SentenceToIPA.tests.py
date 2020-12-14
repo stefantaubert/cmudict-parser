@@ -11,7 +11,7 @@ from cmudict_parser.SentenceToIPA import (
     get_ipa_of_word_without_punctuation_or_unknown_words,
     get_ipa_of_words_with_hyphen, ipa_of_punctuation_and_words_combined,
     recombine_word, replace_unknown_with_is_string, sentence_to_ipa,
-    value_depending_on_is_alphabetic_value_in_punctuations_after_word,
+    value_depending_on_is_alphabetic_value_in_punctuation_after_word,
     word_and_hyphen_before_or_after, word_is_really_upper, word_with_apo)
 
 
@@ -231,38 +231,38 @@ class UnitTests(unittest.TestCase):
 
   # endregion
 
-  # region value_depending_on_is_alphabetic_value_in_punctuations_after_word
+  # region value_depending_on_is_alphabetic_value_in_punctuation_after_word
 
-  def test_value_depending_on_is_alphabetic_value_in_punctuations_after_word__word_with_alphabetic_values_in_punctuations_after_word_which_are_not_in_dict__returns_input_ipa_and_first_char_of_punctuations_after_word_and_underlines_for_rest(self):
+  def test_value_depending_on_is_alphabetic_value_in_punctuation_after_word__word_with_alphabetic_values_in_punctuation_after_word_which_are_not_in_dict__returns_input_ipa_and_first_char_of_punctuation_after_word_and_underlines_for_rest(self):
     input_dict = {"A": "e", "B": "f", "C": "g"}
     punctuation_before_word = ""
     ipa_of_word_without_punctuation = "abc"
-    punctuations_after_word = "#abc"
+    punctuation_after_word = "#abc"
 
-    res = value_depending_on_is_alphabetic_value_in_punctuations_after_word(
-      input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuations_after_word, "_")
+    res = value_depending_on_is_alphabetic_value_in_punctuation_after_word(
+      input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("abc#___", res)
 
-  def test_value_depending_on_is_alphabetic_value_in_punctuations_after_word__word_with_alphabetic_values_in_punctuations_after_word_which_are_in_dict__returns_input_ipa_and_first_char_of_punctuations_after_word_and_ipa_of_upper_letters(self):
+  def test_value_depending_on_is_alphabetic_value_in_punctuation_after_word__word_with_alphabetic_values_in_punctuation_after_word_which_are_in_dict__returns_input_ipa_and_first_char_of_punctuation_after_word_and_ipa_of_upper_letters(self):
     input_dict = {"A": "e", "B": "f", "C": "g"}
     punctuation_before_word = ""
     ipa_of_word_without_punctuation = "abc"
-    punctuations_after_word = "#ABC"
+    punctuation_after_word = "#ABC"
 
-    res = value_depending_on_is_alphabetic_value_in_punctuations_after_word(
-      input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuations_after_word, "_")
+    res = value_depending_on_is_alphabetic_value_in_punctuation_after_word(
+      input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("abc#efg", res)
 
-  def test_value_depending_on_is_alphabetic_value_in_punctuations_after_word__word_without_alphabetic_values_in_punctuations_after_word__returns_input_ipa_and_keeps_punctuations_after_word_as_they_are(self):
+  def test_value_depending_on_is_alphabetic_value_in_punctuation_after_word__word_without_alphabetic_values_in_punctuation_after_word__returns_input_ipa_and_keeps_punctuation_after_word_as_they_are(self):
     input_dict = {"A": "e", "B": "f", "C": "d"}
     punctuation_before_word = ""
     ipa_of_word_without_punctuation = "abc"
-    punctuations_after_word = "#!'-'"
+    punctuation_after_word = "#!'-'"
 
-    res = value_depending_on_is_alphabetic_value_in_punctuations_after_word(
-      input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuations_after_word, "_")
+    res = value_depending_on_is_alphabetic_value_in_punctuation_after_word(
+      input_dict, punctuation_before_word, ipa_of_word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("abc#!'-'", res)
 
@@ -309,81 +309,81 @@ class UnitTests(unittest.TestCase):
 
   def test_ipa_of_punctuation_and_words_combined__word_with_apo_at_beginning__returns_value_of_this_word_plus_punctutations_at_beginning_and_end_but_not_the_apo_that_belongs_to_word(self):
     input_dict = {"ALLO": "a", "'ALLO": "b"}
-    punctuations_before_word = "$-''"
+    punctuation_before_word = "$-''"
     word_without_punctuation = "allo"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-'b+*", res)
 
-  def test_ipa_of_punctuation_and_words_combined__last_char_of_punctuations_before_word_is_apo_but_word_not_in_dict___returns_underlines_instead_of_word_and_keeps_punctuations(self):
+  def test_ipa_of_punctuation_and_words_combined__last_char_of_punctuation_before_word_is_apo_but_word_not_in_dict___returns_underlines_instead_of_word_and_keeps_punctuation(self):
     input_dict = {"ALLO": "a", "'ALLO": "b"}
-    punctuations_before_word = "$-''"
+    punctuation_before_word = "$-''"
     word_without_punctuation = "bllo"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-''____+*", res)
 
   def test_ipa_of_punctuation_and_words_combined__word_with_apo_at_end_is_in_dict___returns_value_of_this_word_plus_punctutations_at_beginning_and_end(self):
     input_dict = {"ALLO": "a", "'ALLO": "b", "ALLO'": "c"}
-    punctuations_before_word = "$-"
+    punctuation_before_word = "$-"
     word_without_punctuation = "allo'"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-c+*", res)
 
   def test_ipa_of_punctuation_and_words_combined__word_has_apo_at_end_but_is_in_dict___returns_value_of_this_word_plus_punctutations_at_beginning_and_end(self):
     input_dict = {"ALLO": "a", "'ALLO": "b"}
-    punctuations_before_word = "$-"
+    punctuation_before_word = "$-"
     word_without_punctuation = "allo'"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-a'+*", res)
 
   def test_ipa_of_punctuation_and_words_combined__word_with_hyphen_and_is_in_dict___returns_value_of_this_word_plus_punctutations_at_beginning_and_end(self):
     input_dict = {"AL-LO": "a", "AL": "b", "LO": "c"}
-    punctuations_before_word = "$-"
+    punctuation_before_word = "$-"
     word_without_punctuation = "al-lo"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-a+*", res)
 
   def test_ipa_of_punctuation_and_words_combined__word_with_hyphen_and_is_not_in_dict_but_its_parts_are___returns_value_of_the_word_parts_connected_with_hyphen_plus_punctutations_at_beginning_and_end(self):
     input_dict = {"ALLO": "a", "AL": "b", "LO": "c"}
-    punctuations_before_word = "$-"
+    punctuation_before_word = "$-"
     word_without_punctuation = "al-lo"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-b-c+*", res)
 
   def test_ipa_of_punctuation_and_words_combined__word_with_hyphen_and_is_not_in_dict_but_one_of_its_parts_are___returns_value_of_this_part_and_underlines_for_the_part_not_in_dict_connected_with_hyphen_plus_punctutations_at_beginning_and_end(self):
     input_dict = {"ALLO": "a", "AL": "b", "O": "c"}
-    punctuations_before_word = "$-"
+    punctuation_before_word = "$-"
     word_without_punctuation = "al-lo"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-b-__+*", res)
 
   def test_ipa_of_punctuation_and_words_combined__normal_word_without_hyphen_or_apo___returns_value_of_word_plus_punctutations_at_beginning_and_end(self):
     input_dict = {"ALLO": "a", "AL": "b", "O": "c"}
-    punctuations_before_word = "$-"
+    punctuation_before_word = "$-"
     word_without_punctuation = "allo"
-    punctuations_after_word = "+*"
+    punctuation_after_word = "+*"
     res = ipa_of_punctuation_and_words_combined(
-      input_dict, punctuations_before_word, word_without_punctuation, punctuations_after_word, "_")
+      input_dict, punctuation_before_word, word_without_punctuation, punctuation_after_word, "_")
 
     self.assertEqual("$-a+*", res)
 
