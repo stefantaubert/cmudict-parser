@@ -201,10 +201,10 @@ class UnitTests(unittest.TestCase):
     self.assertEqual("ˈɛndˈɪnɝkwˈoʊt", res)
 
   def test_sentence_to_ipa__non_smokers(self):
-   # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
-   res = self.cmu_dict.sentence_to_ipa("non-smokers'", replace_unknown_with="_")
+    # non-smokers' is a word in the dictionary, therefore no ' should appear in ipa
+    res = self.cmu_dict.sentence_to_ipa("non-smokers'", replace_unknown_with="_")
 
-   self.assertEqual('nˈɑnsmˈoʊkɝz', res)
+    self.assertEqual('nˈɑnsmˈoʊkɝz', res)
 
   def test_sentence_to_ipa__cat_o_nine_tails_to_with_punctuation(self):
     # should return apostrophe and ipa of cat-o-nine-tails-to
@@ -286,9 +286,11 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__sentence_with_commas(self):
     # should keep the commas and return the ipa of all the words
-    res = self.cmu_dict.sentence_to_ipa("it is not a real gain, for the modern printer throws the gain away by putting inordinately wide spaces between his lines, which, probably,", replace_unknown_with="_")
+    res = self.cmu_dict.sentence_to_ipa(
+      "it is not a real gain, for the modern printer throws the gain away by putting inordinately wide spaces between his lines, which, probably,", replace_unknown_with="_")
 
-    self.assertEqual("ˈɪt ˈɪz nˈɑt ʌ ɹˈil gˈeɪn, fˈɔɹ ðʌ mˈɑdɝn pɹˈɪntɝ θɹˈoʊz ðʌ gˈeɪn ʌwˈeɪ bˈaɪ pˈʌtɪŋ ˌɪnˈɔɹdʌnʌtli wˈaɪd spˈeɪsʌz bɪtwˈin hˈɪz lˈaɪnz, wˈɪʧ, pɹˈɑbʌblˌi,", res)
+    self.assertEqual(
+      "ˈɪt ˈɪz nˈɑt ʌ ɹˈil gˈeɪn, fˈɔɹ ðʌ mˈɑdɝn pɹˈɪntɝ θɹˈoʊz ðʌ gˈeɪn ʌwˈeɪ bˈaɪ pˈʌtɪŋ ˌɪnˈɔɹdʌnʌtli wˈaɪd spˈeɪsʌz bɪtwˈin hˈɪz lˈaɪnz, wˈɪʧ, pɹˈɑbʌblˌi,", res)
 
   def test_sentence_to_ipa__ipa_of_number(self):
     # should return _, as 1 is not in the dictionary
@@ -302,11 +304,9 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("__", res)
 
-
   def test_get_first_ipa__theyre(self):
     res = self.cmu_dict.get_first_ipa("they're")
     self.assertEqual('ðˈɛɹ', res)
-
 
 
 if __name__ == '__main__':
