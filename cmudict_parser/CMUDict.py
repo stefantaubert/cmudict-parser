@@ -63,7 +63,7 @@ class CMUDict():
     self._ensure_data_is_loaded()
     return self._entries_ipa[word.upper()]
 
-  def get_all_arpa(self, word) -> List[str]:
+  def get_all_arpa(self, word: str) -> List[str]:
     '''Returns list of ARPAbet pronunciations of the given word.'''
     self._ensure_data_is_loaded()
     return self._entries_arpa[word.upper()]

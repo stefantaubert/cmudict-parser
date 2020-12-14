@@ -11,18 +11,23 @@ from tqdm import tqdm
 _alt_re = re.compile(r'\([0-9]+\)')
 
 
+def _read_lines(file: str) -> List[str]:
+  with open(file, encoding='latin-1') as f:
+    return f.readlines()
+
+
 def parse(paths: Tuple[str, str, str], silent: bool) -> Dict[str, List[str]]:
   symbols_path, _, dict_path = paths
 
-  with open(symbols_path, encoding='latin-1') as f:
-    _symbols = _parse_symbols(f.readlines())
+  symbols_content = _read_lines(symbols_path)
+  symbols = _parse_symbols(symbols_content)
 
-  with open(dict_path, encoding='latin-1') as f:
-    entries = _parse_cmudict(f.readlines(), silent)
+  dict_content = _read_lines(dict_path)
+  result = _parse_cmudict(dict_content, silent)
 
-  assert_check_to_unknown_symbols(entries, _symbols)
+  _check_have_unknown_symbols(result, symbols)
 
-  return entries
+  return result
 
 
 def _parse_cmudict(lines: List[str], silent: bool) -> Dict[str, List[str]]:
@@ -83,13 +88,13 @@ def _parse_symbols(lines: List[str]) -> Set[str]:
   return symbols_as_set
 
 
-def assert_check_to_unknown_symbols(entries: Dict[str, List[str]], _symbols: Set[str]):
+def _check_have_unknown_symbols(entries: Dict[str, List[str]], _symbols: Set[str]) -> None:
   for _, pronunciations in entries.items():
     for p in pronunciations:
-      _assert_contains_no_unknown_symbols(p, _symbols)
+      _check_contains_no_unknown_symbols(p, _symbols)
 
 
-def _assert_contains_no_unknown_symbols(pronunciation: str, known_symbols: Set[str]) -> str:
+def _check_contains_no_unknown_symbols(pronunciation: str, known_symbols: Set[str]) -> str:
   parts = pronunciation.split(' ')
 
   for part in parts:
@@ -97,4 +102,4 @@ def _assert_contains_no_unknown_symbols(pronunciation: str, known_symbols: Set[s
 
     if is_unknown_symbol:
       # CMUs fault: unknown symbol exist in dict
-      assert False
+      raise Exception("The dictionary contains symbols which were not in the symbols-file!")
