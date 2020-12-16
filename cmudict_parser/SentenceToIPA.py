@@ -65,8 +65,8 @@ def ipa_of_punctuation_and_words_combined(dict: Dict[str, str], punctuation_befo
     ipa_of_word_without_punct = get_ipa_of_word_without_punctuation_or_unknown_words(
       dict, word_with_apo_at_end, replace_unknown_with)
   elif "-" in word_without_punctuation and not word_without_punctuation.upper() in dict:
-    ipa_of_word_without_punct = get_ipa_of_words_with_hyphen(
-      dict, word_without_punctuation, replace_unknown_with)
+    ipa_of_word_without_punct = f"{get_ipa_of_words_with_hyphen(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
+    #get_ipa_of_words_with_hyphen(dict, word_without_punctuation, replace_unknown_with)
   else:
     ipa_of_word_without_punct = f"{get_ipa_of_word_without_punctuation_or_unknown_words(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
   return value_depending_on_is_alphabetic_value_in_punctuation_after_word(dict, punctuation_before_word, ipa_of_word_without_punct, punctuation_after_word, replace_unknown_with)
@@ -105,6 +105,16 @@ def find_combination_of_certain_length_in_dict(dict: Dict[str, str], parts: List
       word_after, hyphen_after = word_and_hyphen_before_or_after(
         parts, startword_pos + length_of_combination, len(parts))
       return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination.upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+    if combination[0] == "'" and combination[1:].upper() in dict:
+      word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
+      word_after, hyphen_after = word_and_hyphen_before_or_after(
+        parts, startword_pos + length_of_combination, len(parts))
+      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}'{dict[combination[1:].upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+    if combination[-1] == "'" and combination[:-1].upper() in dict:
+      word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
+      word_after, hyphen_after = word_and_hyphen_before_or_after(
+        parts, startword_pos + length_of_combination, len(parts))
+      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination[:-1].upper()]}'{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
   return None
 
 
