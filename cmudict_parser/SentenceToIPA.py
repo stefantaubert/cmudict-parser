@@ -96,26 +96,61 @@ def get_ipa_of_words_with_hyphen(dict: Dict[str, str], word: str, replace_unknow
   return ipa
 
 
+# def find_combination_of_certain_length_in_dict(dict: Dict[str, str], parts: List[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> Optional[str]:
+#   assert all_keys_are_upper(dict)
+#   for startword_pos in range(len(parts) - length_of_combination + 1):
+#     combination = recombine_word(parts, startword_pos, startword_pos + length_of_combination)
+#     if combination.upper() in dict:
+#       word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
+#       word_after, hyphen_after = word_and_hyphen_before_or_after(
+#         parts, startword_pos + length_of_combination, len(parts))
+#       return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination.upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+#     if combination[0] == "'" and combination[1:].upper() in dict:
+#       word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
+#       word_after, hyphen_after = word_and_hyphen_before_or_after(
+#         parts, startword_pos + length_of_combination, len(parts))
+#       return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}'{dict[combination[1:].upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+#     if combination[-1] == "'" and combination[:-1].upper() in dict:
+#       word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
+#       word_after, hyphen_after = word_and_hyphen_before_or_after(
+#         parts, startword_pos + length_of_combination, len(parts))
+#       return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination[:-1].upper()]}'{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+#   return None
+
 def find_combination_of_certain_length_in_dict(dict: Dict[str, str], parts: List[str], length_of_combination, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> Optional[str]:
   assert all_keys_are_upper(dict)
   for startword_pos in range(len(parts) - length_of_combination + 1):
     combination = recombine_word(parts, startword_pos, startword_pos + length_of_combination)
-    if combination.upper() in dict:
+    word, apos_before, apos_after, word_with_apo_at_beginning, word_with_apo_at_end = strip_apos_at_beginning_and_end(
+      combination)
+    if apos_before != "" and word_with_apo_at_beginning.upper() in dict:
       word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
       word_after, hyphen_after = word_and_hyphen_before_or_after(
         parts, startword_pos + length_of_combination, len(parts))
-      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination.upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
-    if combination[0] == "'" and combination[1:].upper() in dict:
+      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{apos_before[:-1]}{dict[word_with_apo_at_beginning.upper()]}{apos_after}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+    if apos_after != "" and word_with_apo_at_end.upper() in dict:
       word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
       word_after, hyphen_after = word_and_hyphen_before_or_after(
         parts, startword_pos + length_of_combination, len(parts))
-      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}'{dict[combination[1:].upper()]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
-    if combination[-1] == "'" and combination[:-1].upper() in dict:
+      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{apos_before}{dict[word_with_apo_at_end.upper()]}{apos_after[:-1]}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+    if word.upper() in dict:
       word_before, hyphen_before = word_and_hyphen_before_or_after(parts, 0, startword_pos)
       word_after, hyphen_after = word_and_hyphen_before_or_after(
         parts, startword_pos + length_of_combination, len(parts))
-      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{dict[combination[:-1].upper()]}'{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
+      return f"{get_ipa_of_word_in_sentence(dict, word_before, replace_unknown_with)}{hyphen_before}{apos_before}{dict[word.upper()]}{apos_after}{hyphen_after}{get_ipa_of_word_in_sentence(dict, word_after, replace_unknown_with)}"
   return None
+
+
+def strip_apos_at_beginning_and_end(word: str) -> Tuple[str, str, str]:
+  apos_before = ""
+  apos_after = ""
+  while word[0] == "'":
+    apos_before += "'"
+    word = word[1:]
+  while word[-1] == "'":
+    apos_after += "'"
+    word = word[:-1]
+  return word, apos_before, apos_after, f"'{word}", f"{word}'"
 
 
 def word_and_hyphen_before_or_after(parts: List[str], startpos: int, endpos: int) -> Tuple[str, str]:

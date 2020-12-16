@@ -320,6 +320,12 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("\"'hˈuz nˈeɪm ˈɪz'--ˈɪz'", res)
 
+  def test_sentence_to_ipa__sentence_with_words_with_different_apo_combinations(self):
+    # should return ipa of the words and keep punctuation
+    res = self.cmu_dict.sentence_to_ipa("\"'Whose'-'stones'''-'Allo''", replace_unknown_with="_")
+
+    self.assertEqual("\"'hˈuz'-'stˈoʊnz''-ˌɑlˈoʊ''", res)
+
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
