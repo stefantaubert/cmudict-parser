@@ -14,6 +14,41 @@ class UnitTests(unittest.TestCase):
     self.cmu_dict = cmu_dict_instance
     super().__init__(methodName)
 
+  def test_sentence_to_ipa__with_caching__executes_custom_func_only_once(self):
+    input_word = "xyzxyz"
+    assert not self.cmu_dict.contains(input_word.upper())
+
+    res = [self.cmu_dict.sentence_to_ipa(
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i),
+      use_caching=True
+    ) for i in range(2)]
+
+    self.assertEqual(["0", "0"], res)
+
+  def test_sentence_to_ipa__without_caching__executes_custom_func(self):
+    input_word = "xyzxyz"
+    assert not self.cmu_dict.contains(input_word.upper())
+
+    res = [self.cmu_dict.sentence_to_ipa(
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i),
+      use_caching=False
+    ) for i in range(2)]
+
+    self.assertEqual(["0", "1"], res)
+
+  def test_sentence_to_ipa__uses_caching_by_default(self):
+    input_word = "xyzxyz"
+    assert not self.cmu_dict.contains(input_word.upper())
+
+    res = [self.cmu_dict.sentence_to_ipa(
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i)
+    ) for i in range(2)]
+
+    self.assertEqual(["0", "0"], res)
+
   def test_len(self):
     res = len(self.cmu_dict)
     self.assertEqual(125022, res)
@@ -36,25 +71,29 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa_no_replace_unknown_keep_original(self):
     # should return ipa of to and keep xxl
-    res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with=None, use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "to to. xxl xxl.", replace_unknown_with=None, use_caching=False)
 
     self.assertEqual("tˈu tˈu. xxl xxl.", res)
 
   def test_sentence_to_ipa_replace_unknown_with_underscore(self):
     # should return ipa of to and replace xxl with ___
-    res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "to to. xxl xxl.", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("tˈu tˈu. ___ ___.", res)
 
   def test_sentence_to_ipa_replace_unknown_with_nothing(self):
     # should return ipa of to and replace xxl with empty string (but keep space in between)
-    res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with="", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "to to. xxl xxl.", replace_unknown_with="", use_caching=False)
 
     self.assertEqual("tˈu tˈu.  .", res)
 
   def test_sentence_to_ipa_replace_unknown_with_custom_func(self):
     # should return ipa of to and keep xxl with an added X
-    res = self.cmu_dict.sentence_to_ipa("to to. xxl xxl.", replace_unknown_with=lambda x: x + "X", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "to to. xxl xxl.", replace_unknown_with=lambda x: x + "X", use_caching=False)
 
     self.assertEqual("tˈu tˈu. xxlX xxlX.", res)
 
@@ -128,7 +167,8 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__double_punctuation_marks(self):
     # should return ipa of to with double hyphens in between and double parenthesis at beginning and end
-    res = self.cmu_dict.sentence_to_ipa("((to--to--to))", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "((to--to--to))", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("((tˈu--tˈu--tˈu))", res)
 
@@ -152,7 +192,8 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__mix_of_different_scenarios(self):
     # should keep the punctuation at the corresponding places, return the ipa of to, the ipa of every single letter in PRS and replace every letter of xxl with _
-    res = self.cmu_dict.sentence_to_ipa("((to-?PRS --to xxl))", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "((to-?PRS --to xxl))", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("((tˈu-?pˈiˈɑɹˈɛs --tˈu ___))", res)
 
@@ -170,13 +211,15 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__cat_o_nine_tails(self):
     # cat-o-nine-tails is really a single word in the dictionary, should return its ipa
-    res = self.cmu_dict.sentence_to_ipa("cat-o-nine-tails", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "cat-o-nine-tails", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual('kˈætoʊnˌaɪntˌeɪlz', res)
 
   def test_sentence_to_ipa__to_cat_o_nine_tails_to(self):
     # should return ipa of to, hyphen, ipa of cat-o-nine-tails, hyphen, ipa of to
-    res = self.cmu_dict.sentence_to_ipa("to-cat-o-nine-tails-to", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "to-cat-o-nine-tails-to", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual('tˈu-kˈætoʊnˌaɪntˌeɪlz-tˈu', res)
 
@@ -190,13 +233,15 @@ class UnitTests(unittest.TestCase):
     # day-by-day and day-to-day are both words in the dictionary
     # the code should recognize day-by-day as a word and not day-to-day
     # therefore should return ipa of day-by-day (with no hyphen), hyphen, ipa of to, hyphen, ipa of day
-    res = self.cmu_dict.sentence_to_ipa("day-by-day-to-day", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "day-by-day-to-day", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual('dˈeɪbaɪdˌeɪ-tˈu-dˈeɪ', res)
 
   def test_sentence_to_ipa__end_inner_quote(self):
     # 'end-inner-qoute is a word in the dictionary, therefore no ' should appear in ipa
-    res = self.cmu_dict.sentence_to_ipa("'end-inner-quote", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "'end-inner-quote", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("ˈɛndˈɪnɝkwˈoʊt", res)
 
@@ -208,7 +253,8 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__cat_o_nine_tails_to_with_punctuation(self):
     # should return apostrophe and ipa of cat-o-nine-tails-to
-    res = self.cmu_dict.sentence_to_ipa("'cat-o-nine-tails-to", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "'cat-o-nine-tails-to", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("'kˈætoʊnˌaɪntˌeɪlz-tˈu", res)
 
@@ -220,7 +266,8 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__sentence_with_apos(self):
     # all apostrophes in the sentence should not appear in the ipa as they belong to the words
-    res = self.cmu_dict.sentence_to_ipa("'Allo, to they're?", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "'Allo, to they're?", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("ˌɑlˈoʊ, tˈu ðˈɛɹ?", res)
 
@@ -310,19 +357,22 @@ class UnitTests(unittest.TestCase):
 
   def test_sentence_to_ipa__sentence_with_word_ending_with_apo_and_two_hyphen(self):
     # should return ipa of the words and keep punctuation
-    res = self.cmu_dict.sentence_to_ipa("\"'Whose name is'--", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "\"'Whose name is'--", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("\"'hˈuz nˈeɪm ˈɪz'--", res)
 
   def test_sentence_to_ipa__sentence_with_word_with_apo_and_two_hyphen_followed_by_another_word(self):
     # should return ipa of the words and keep punctuation
-    res = self.cmu_dict.sentence_to_ipa("\"'Whose name is'--is'", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "\"'Whose name is'--is'", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("\"'hˈuz nˈeɪm ˈɪz'--ˈɪz'", res)
 
   def test_sentence_to_ipa__sentence_with_words_with_different_apo_combinations(self):
     # should return ipa of the words and keep punctuation
-    res = self.cmu_dict.sentence_to_ipa("\"'Whose'-'stones'''-'Allo''", replace_unknown_with="_", use_caching=False)
+    res = self.cmu_dict.sentence_to_ipa(
+      "\"'Whose'-'stones'''-'Allo''", replace_unknown_with="_", use_caching=False)
 
     self.assertEqual("\"'hˈuz'-'stˈoʊnz''-ˌɑlˈoʊ''", res)
 

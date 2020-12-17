@@ -46,7 +46,7 @@ class CMUDict():
         result[word].append(ipa)
     return result
 
-  def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool) -> str:
+  def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool = True) -> str:
     self._ensure_data_is_loaded()
     return get_ipa_of_sentence(self._entries_first_ipa, sentence, replace_unknown_with, use_caching)
 

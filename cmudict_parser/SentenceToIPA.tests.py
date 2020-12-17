@@ -548,20 +548,26 @@ class UnitTests(unittest.TestCase):
   def test_sentence_to_ipa__without_caching__executes_custom_func(self):
     input_dict = {}
     input_word = "x"
-    res = []
-    for i in range(2):
-      res.append(sentence_to_ipa(input_dict, input_word,
-                                 replace_unknown_with=lambda _: str(i), use_caching=False))
+
+    res = [sentence_to_ipa(
+      dict=input_dict,
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i),
+      use_caching=False
+    ) for i in range(2)]
 
     self.assertEqual(["0", "1"], res)
 
   def test_sentence_to_ipa__with_caching__executes_custom_func_only_once(self):
     input_dict = {}
     input_word = "x"
-    res = []
-    for i in range(2):
-      res.append(sentence_to_ipa(input_dict, input_word,
-                                 replace_unknown_with=lambda _: str(i), use_caching=True))
+
+    res = [sentence_to_ipa(
+      dict=input_dict,
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i),
+      use_caching=True
+    ) for i in range(2)]
 
     self.assertEqual(["0", "0"], res)
 
