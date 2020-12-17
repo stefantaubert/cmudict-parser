@@ -1,5 +1,4 @@
 import unittest
-from typing import Optional
 
 from cmudict_parser.CMUDict import CMUDict
 from cmudict_parser.SentenceToIPA import (
@@ -11,6 +10,7 @@ from cmudict_parser.SentenceToIPA import (
     get_ipa_of_word_without_punctuation_or_unknown_words,
     get_ipa_of_words_with_hyphen, ipa_of_punctuation_and_words_combined,
     recombine_word, replace_unknown_with_is_string, sentence_to_ipa,
+    strip_apos, strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word,
     value_depending_on_is_alphabetic_value_in_punctuation_after_word,
     word_and_hyphen_before_or_after, word_is_really_upper, word_with_apo)
 
@@ -86,7 +86,7 @@ class UnitTests(unittest.TestCase):
   def test_get_ipa_of_word_without_punctuation_or_unknown_words__replace_unknown_with_string_with_more_than_one_char_and_word_not_in_dict__throws_exception(self):
     self.assertRaises(ValueError, replace_unknown_with_is_string, "prs", replace_unknown_with="123")
 
-  def test_gget_ipa_of_word_without_punctuation_or_unknown_words__word_not_in_dict_replace_unknown_with_costum_func__returns_word(self):
+  def test_get_ipa_of_word_without_punctuation_or_unknown_words__word_not_in_dict_replace_unknown_with_costum_func__returns_word(self):
     input_dict = {"PSR": "abc", "P": "x", "R": "y", "S": "z"}
     res = get_ipa_of_word_without_punctuation_or_unknown_words(
       input_dict, "prs", replace_unknown_with=lambda x: x + "123")
@@ -545,6 +545,60 @@ class UnitTests(unittest.TestCase):
     res = sentence_to_ipa(input_dict, input_word, "_")
 
     self.assertEqual("___ dc", res)
+
+  # endregion
+
+  # region strip_apos
+
+  def test_strip_apos__word_with_apo_at_beginning(self):
+    input_word = "'''stones'"
+    res = strip_apos(input_word, 0)
+
+    self.assertEqual(2, len(res))
+    self.assertEqual("stones'", res[0])
+    self.assertEqual("'''", res[1])
+
+  def test_strip_apos__word_with_apo_at_end(self):
+    input_word = "'''stones'"
+    res = strip_apos(input_word, -1)
+
+    self.assertEqual(2, len(res))
+    self.assertEqual("'''stones", res[0])
+    self.assertEqual("'", res[1])
+
+  # endregion
+
+  # region strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word
+
+  def test_strip_apos__word_with_apo_at_beginning_which_belongs_to_word(self):
+    input_word = "'''Allo'"
+    input_dict = {"'ALLO": "a", "ALLO": "b"}
+    res = strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word(input_dict, input_word)
+
+    self.assertEqual(3, len(res))
+    self.assertEqual("'Allo", res[0])
+    self.assertEqual("''", res[1])
+    self.assertEqual("'", res[2])
+
+  def test_strip_apos__word_with_apo_at_end_which_belongs_to_word(self):
+    input_word = "'''stones''"
+    input_dict = {"STONES'": "a", "STONES": "b"}
+    res = strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word(input_dict, input_word)
+
+    self.assertEqual(3, len(res))
+    self.assertEqual("stones'", res[0])
+    self.assertEqual("'''", res[1])
+    self.assertEqual("'", res[2])
+
+  def test_strip_apos__word_to_which_no_apos_belong(self):
+    input_word = "'''stones''"
+    input_dict = {"STONES": "b"}
+    res = strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word(input_dict, input_word)
+
+    self.assertEqual(3, len(res))
+    self.assertEqual("stones", res[0])
+    self.assertEqual("'''", res[1])
+    self.assertEqual("''", res[2])
 
   # endregion
 
