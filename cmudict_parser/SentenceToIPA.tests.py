@@ -1,6 +1,5 @@
 import unittest
 
-from cmudict_parser.CMUDict import CMUDict
 from cmudict_parser.SentenceToIPA import (
     big_letters_to_ipa,
     extract_punctuation_after_word_except_hyphen_or_apostrophe,
@@ -545,6 +544,26 @@ class UnitTests(unittest.TestCase):
     res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("___ dc", res)
+
+  def test_sentence_to_ipa__without_caching__executes_custom_func(self):
+    input_dict = {}
+    input_word = "x"
+    res = []
+    for i in range(2):
+      res.append(sentence_to_ipa(input_dict, input_word,
+                                 replace_unknown_with=lambda _: str(i), use_caching=False))
+
+    self.assertEqual(["0", "1"], res)
+
+  def test_sentence_to_ipa__with_caching__executes_custom_func_only_once(self):
+    input_dict = {}
+    input_word = "x"
+    res = []
+    for i in range(2):
+      res.append(sentence_to_ipa(input_dict, input_word,
+                                 replace_unknown_with=lambda _: str(i), use_caching=True))
+
+    self.assertEqual(["0", "0"], res)
 
   # endregion
 

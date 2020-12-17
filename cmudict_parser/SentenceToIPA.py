@@ -14,10 +14,10 @@ IPA_CACHE: Dict[str, str] = {}
 def sentence_to_ipa(dict: Dict[str, str], sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool) -> str:
   words = sentence.split(" ")
   if use_caching:
-    ipa_words = [get_ipa_of_word_in_sentence(dict, word, replace_unknown_with) for word in words]
-  else:
     ipa_words = [get_ipa_of_word_in_sentence_cache(
       dict, word, replace_unknown_with) for word in words]
+  else:
+    ipa_words = [get_ipa_of_word_in_sentence(dict, word, replace_unknown_with) for word in words]
   res = " ".join(ipa_words)
   return res
 
