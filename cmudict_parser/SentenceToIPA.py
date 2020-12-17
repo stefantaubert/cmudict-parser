@@ -11,6 +11,10 @@ PUNCTUATION_AND_LINEBREAK = f"{string.punctuation}\n"
 IPA_CACHE: Dict[str, str] = {}
 
 
+def clear_cache() -> None:
+  IPA_CACHE.clear()
+
+
 def sentence_to_ipa(dict: Dict[str, str], sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool) -> str:
   words = sentence.split(" ")
   if use_caching:
