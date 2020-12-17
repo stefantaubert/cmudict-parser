@@ -326,6 +326,20 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("\"'hˈuz'-'stˈoʊnz''-ˌɑlˈoʊ''", res)
 
+  def test_sentence_to_ipa__sentence_with_words_with_apos_belonging_to_the_word_but_some_are_not_in_dict__plus_combination_of_apo_and_hyphens_between_words(self):
+    # should return ipa of the words which are in dict and keep punctuation where it does not belong to any word
+    res = self.cmu_dict.sentence_to_ipa(
+      "Suckin'--I mean helpin' people an' fightin' an' all that.", replace_unknown_with="_")
+
+    self.assertEqual("_______--ˈaɪ mˈin ______' pˈipʌl ˈæn' fˈaɪtɪn ˈæn' ˈɔl ðˈæt.", res)
+
+  def test_sentence_to_ipa__sentence_with_words_with_apos_belonging_to_the_word_but_some_are_not_in_dict__plus_combination_of_apo_and_hyphens_between_words2(self):
+    # should return ipa of the words which are in dict and keep punctuation where it does not belong to any word
+    res = self.cmu_dict.sentence_to_ipa(
+      "Fightin'--I mean helpin' people an' suckin' an' all that.", replace_unknown_with="_")
+
+    self.assertEqual("fˈaɪtɪn--ˈaɪ mˈin ______' pˈipʌl ˈæn' ______' ˈæn' ˈɔl ðˈæt.", res)
+
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
