@@ -526,7 +526,7 @@ class UnitTests(unittest.TestCase):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e",
                   "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "'A-B#'"
-    res = sentence_to_ipa(input_dict, input_word, "_")
+    res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("g#'", res)
 
@@ -534,7 +534,7 @@ class UnitTests(unittest.TestCase):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e",
                   "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "A B 'A A-B 'A-B' 'A-B#' A"
-    res = sentence_to_ipa(input_dict, input_word, "_")
+    res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("c d e ab i g#' c", res)
 
@@ -542,7 +542,7 @@ class UnitTests(unittest.TestCase):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e",
                   "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "abc BA"
-    res = sentence_to_ipa(input_dict, input_word, "_")
+    res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("___ dc", res)
 
