@@ -66,7 +66,6 @@ def ipa_of_punctuation_and_words_combined(dict: Dict[str, str], punctuation_befo
       dict, word_with_apo_at_end, replace_unknown_with)
   elif "-" in word_without_punctuation and not word_without_punctuation.upper() in dict:
     ipa_of_word_without_punct = f"{get_ipa_of_words_with_hyphen(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
-    #get_ipa_of_words_with_hyphen(dict, word_without_punctuation, replace_unknown_with)
   else:
     ipa_of_word_without_punct = f"{get_ipa_of_word_without_punctuation_or_unknown_words(dict, word_without_punctuation, replace_unknown_with)}{char_at_end}"
   return value_depending_on_is_alphabetic_value_in_punctuation_after_word(dict, punctuation_before_word, ipa_of_word_without_punct, punctuation_after_word, replace_unknown_with)
@@ -111,14 +110,8 @@ def find_combination_of_certain_length_in_dict(dict: Dict[str, str], parts: List
 
 
 def strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word(dict: Dict[str, str], word: str) -> Tuple[str, str, str]:
-  apos_before = ""
-  apos_after = ""
-  while word[0] == "'":
-    apos_before += "'"
-    word = word[1:]
-  while word[-1] == "'":
-    apos_after += "'"
-    word = word[:-1]
+  word, apos_before = strip_apos(word, 0)
+  word, apos_after = strip_apos(word, -1)
   if f"{word}'".upper() in dict and apos_after != "":
     word = f"{word}'"
     apos_after = apos_after[:-1]
@@ -129,7 +122,12 @@ def strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word(dict: Dict[str
 
 
 def strip_apos(word: str, pos: int) -> Tuple[str, str]:
-  apos =
+  assert pos == 0 or pos == -1
+  apos = ""
+  while word[pos] == "'":
+    apos += "'"
+    word = word[1:] if pos == 0 else word[:-1]
+  return word, apos
 
 
 def word_and_hyphen_before_or_after(parts: List[str], startpos: int, endpos: int) -> Tuple[str, str]:
