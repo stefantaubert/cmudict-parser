@@ -145,7 +145,7 @@ def strip_apos_at_beginning_and_end_if_they_do_not_belong_to_word(dict: Dict[str
 def strip_apos(word: str, pos: int) -> Tuple[str, str]:
   assert pos == 0 or pos == -1
   apos = ""
-  while word[pos] == "'":
+  while word != "" and word[pos] == "'":
     apos += "'"
     word = word[1:] if pos == 0 else word[:-1]
   return word, apos
