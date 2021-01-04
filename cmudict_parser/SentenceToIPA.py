@@ -8,15 +8,36 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 PUNCTUATION_AND_LINEBREAK = f"{string.punctuation}\n"
 
+IPA_CACHE: Dict[str, str] = {}
 
-def sentence_to_ipa(dict: Dict[str, str], sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+
+def clear_cache() -> None:
+  IPA_CACHE.clear()
+
+
+def sentence_to_ipa(dict: Dict[str, str], sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool) -> str:
   words = sentence.split(" ")
-  ipa_words = [get_ipa_of_word_in_sentence(dict, word, replace_unknown_with) for word in words]
+  if use_caching:
+    ipa_words = [get_ipa_of_word_in_sentence_cache(
+      dict, word, replace_unknown_with) for word in words]
+  else:
+    ipa_words = [get_ipa_of_word_in_sentence(dict, word, replace_unknown_with) for word in words]
   res = " ".join(ipa_words)
   return res
 
 
+def get_ipa_of_word_in_sentence_cache(dict: Dict[str, str], word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+  global IPA_CACHE
+  if word in IPA_CACHE:
+    return IPA_CACHE[word]
+  else:
+    ipa = get_ipa_of_word_in_sentence(dict, word, replace_unknown_with)
+    IPA_CACHE[word] = ipa
+    return ipa
+
+
 def get_ipa_of_word_in_sentence(dict: Dict[str, str], word: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]]) -> str:
+  global IPA_CACHE
   if any(char in PUNCTUATION_AND_LINEBREAK for char in word):
     ipa = get_ipa_of_word_with_punctuation(dict, word, replace_unknown_with)
   else:

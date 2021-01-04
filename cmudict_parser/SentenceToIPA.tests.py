@@ -1,6 +1,5 @@
 import unittest
 
-from cmudict_parser.CMUDict import CMUDict
 from cmudict_parser.SentenceToIPA import (
     big_letters_to_ipa,
     extract_punctuation_after_word_except_hyphen_or_apostrophe,
@@ -526,7 +525,7 @@ class UnitTests(unittest.TestCase):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e",
                   "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "'A-B#'"
-    res = sentence_to_ipa(input_dict, input_word, "_")
+    res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("g#'", res)
 
@@ -534,7 +533,7 @@ class UnitTests(unittest.TestCase):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e",
                   "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "A B 'A A-B 'A-B' 'A-B#' A"
-    res = sentence_to_ipa(input_dict, input_word, "_")
+    res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("c d e ab i g#' c", res)
 
@@ -542,9 +541,35 @@ class UnitTests(unittest.TestCase):
     input_dict = {"A-B": "ab", "A": "c", "B": "d", "'A": "e",
                   "B'": "f", "'A-B": "g", "A-B'": "h", "'A-B'": "i"}
     input_word = "abc BA"
-    res = sentence_to_ipa(input_dict, input_word, "_")
+    res = sentence_to_ipa(input_dict, input_word, "_", use_caching=False)
 
     self.assertEqual("___ dc", res)
+
+  def test_sentence_to_ipa__without_caching__executes_custom_func(self):
+    input_dict = {}
+    input_word = "x"
+
+    res = [sentence_to_ipa(
+      dict=input_dict,
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i),
+      use_caching=False
+    ) for i in range(2)]
+
+    self.assertEqual(["0", "1"], res)
+
+  def test_sentence_to_ipa__with_caching__executes_custom_func_only_once(self):
+    input_dict = {}
+    input_word = "x"
+
+    res = [sentence_to_ipa(
+      dict=input_dict,
+      sentence=input_word,
+      replace_unknown_with=lambda _: str(i),
+      use_caching=True
+    ) for i in range(2)]
+
+    self.assertEqual(["0", "0"], res)
 
   # endregion
 
