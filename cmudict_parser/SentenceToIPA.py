@@ -112,7 +112,10 @@ def get_ipa_of_words_with_hyphen(dict: Dict[str, str], word: str, replace_unknow
       dict, parts, length_of_combination, replace_unknown_with)
     if ipa is not None:
       break
-  assert ipa is not None
+  if ipa is None:
+    unknown_list = [get_ipa_of_word_without_punctuation_or_unknown_words(
+      dict, part, replace_unknown_with) for part in parts]
+    ipa = "-".join(unknown_list)
   return ipa
 
 
