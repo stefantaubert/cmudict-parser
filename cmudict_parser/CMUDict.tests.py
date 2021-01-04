@@ -340,6 +340,20 @@ class UnitTests(unittest.TestCase):
 
     self.assertEqual("fˈaɪtɪn--ˈaɪ mˈin ______' pˈipʌl ˈæn' ______' ˈæn' ˈɔl ðˈæt.", res)
 
+  def test_sentence_to_ipa__sentence_with_words_with_hypen_in_which_parts_are_unknown(self):
+    # should return _ in the length of the unknown parts, keep the hyphens and return ipa for the known words
+    res = self.cmu_dict.sentence_to_ipa(
+      "higgledy-piggledy, myself-piggledy, higgledy-i", replace_unknown_with="_")
+
+    self.assertEqual("________-________, mˌaɪsˈɛlf-________, ________-ˈaɪ", res)
+
+  def test_sentence_to_ipa__sentence_with_words_with_double_hypen_in_which_parts_are_unknown(self):
+    # should return _ in the length of the unknown parts, keep the double hyphens and return ipa for the known words
+    res = self.cmu_dict.sentence_to_ipa(
+      "higgledy--piggledy, myself--piggledy, higgledy--i", replace_unknown_with="_")
+
+    self.assertEqual("________--________, mˌaɪsˈɛlf--________, ________--ˈaɪ", res)
+
 
 if __name__ == '__main__':
   suite = unittest.TestLoader().loadTestsFromTestCase(UnitTests)
