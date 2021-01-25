@@ -8,5 +8,5 @@ setup(
     author_email="stefan.taubert@posteo.de",
     description="Python parser for CMUDict files. It returns ARBAbet and IPA transciption of dictionary words.",
     packages=["cmudict_parser"],
-    install_requires=["tqdm==4.54.0", "wget==3.2"],
+    install_requires=["tqdm>=4.54.0", "wget>=3.2"],
 )
