@@ -4,6 +4,7 @@ https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'dec
 """
 
 import string
+from logging import getLogger
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 PUNCTUATION_AND_LINEBREAK = f"{string.punctuation}\n"
@@ -186,7 +187,10 @@ def replace_unknown_with_is_string(word: str, replace_unknown_with: str) -> str:
   assert isinstance(replace_unknown_with, str)
   if len(replace_unknown_with) >= 2:
     raise ValueError("Parameter replace_unknown_with can only be 0 or 1 char.")
-  return len(word) * replace_unknown_with
+  res = len(word) * replace_unknown_with
+  logger = getLogger(__name__)
+  logger.warning(f"Replaced {word} with {res}")
+  return res
 
 
 def word_is_really_upper(word: str) -> bool:
