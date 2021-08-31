@@ -25,6 +25,7 @@ class CMUDict():
     self._entries_arpa = entries
     self._entries_ipa = self._convert_to_ipa(silent)
     self._entries_first_ipa = self._extract_first_ipa()
+    self._entries_first_arpa = self._extract_first_arpa()
     self._loaded = True
 
   def _ensure_data_is_loaded(self) -> None:
@@ -35,12 +36,16 @@ class CMUDict():
     result: Dict[str, str] = {word: ipas[0] for word, ipas in self._entries_ipa.items()}
     return result
 
+  def _extract_first_arpa(self) -> Dict[str, str]:
+    result: Dict[str, str] = {word: arpas[0] for word, arpas in self._entries_arpa.items()}
+    return result
+
   def _convert_to_ipa(self, silent: bool) -> Dict[str, List[str]]:
     result: Dict[str, List[str]] = {word: [] for word, _ in self._entries_arpa.items()}
-    items = self._entries_arpa.items() if silent else tqdm(self._entries_arpa.items())
-    for word, pronunciations in items:
-      for pronunciation in pronunciations:
-        phonemes = pronunciation.split(' ')
+    arpa_pronunciations_to_words = self._entries_arpa.items() if silent else tqdm(self._entries_arpa.items())
+    for word, arpa_pronunciations_to_word in arpa_pronunciations_to_words:
+      for arpa_pronunciation in arpa_pronunciations_to_word:
+        phonemes = arpa_pronunciation.split(' ')
         ipa_phonemes = [get_ipa_with_stress(phoneme) for phoneme in phonemes]
         ipa = ''.join(ipa_phonemes)
         result[word].append(ipa)
@@ -49,6 +54,10 @@ class CMUDict():
   def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool = True) -> str:
     self._ensure_data_is_loaded()
     return get_ipa_of_sentence(self._entries_first_ipa, sentence, replace_unknown_with, use_caching)
+
+  def sentence_to_arpa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool = True) -> str:
+    self._ensure_data_is_loaded()
+    return get_ipa_of_sentence(self._entries_first_arpa, sentence, replace_unknown_with, use_caching)
 
   def contains(self, word: str) -> bool:
     self._ensure_data_is_loaded()
