@@ -12,6 +12,7 @@ from cmudict_parser.SentenceToIPA import sentence_to_ipa as get_ipa_of_sentence
 
 ENG_SPACE = " "
 ARPA_SPACE = " "
+ARPA_UNKNOWN = "<UNK>"
 
 
 def join_lists(lists: List[List[Any]], join_with: List[Any]) -> List[Any]:
@@ -62,6 +63,8 @@ class CMUDict():
       if self.contains(word):
         arpa_pronunciation = self.get_first_arpa(word)
         tmp.append(arpa_pronunciation)
+      else:
+        tmp.append([ARPA_UNKNOWN])
     return join_lists(tmp, join_with=[ARPA_SPACE])
 
   def contains(self, word: Word) -> bool:
