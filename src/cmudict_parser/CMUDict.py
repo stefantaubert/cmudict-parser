@@ -3,14 +3,27 @@ Remarks:
 https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'declarative' but is has unfortunately no MIT-license.
 """
 
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from tqdm import tqdm
-
-from cmudict_parser.ARPAToIPAMapper import get_ipa_with_stress
 from cmudict_parser.CMUDictDownloader import ensure_files_are_downloaded
-from cmudict_parser.CMUDictParser import parse
+from cmudict_parser.CMUDictParser import (ARPAPronunciation,
+                                          ARPAPronunciations, Word, parse)
 from cmudict_parser.SentenceToIPA import sentence_to_ipa as get_ipa_of_sentence
+
+ENG_SPACE = " "
+ARPA_SPACE = " "
+
+
+def join_lists(lists: List[List[Any]], join_with: List[Any]) -> List[Any]:
+  if len(lists) == 0:
+    return []
+  if len(lists) == 1:
+    return lists[0]
+  result = lists[0]
+  for i in range(1, len(lists)):
+    result.extend(join_with)
+    result.extend(lists[i])
+  return result
 
 
 class CMUDict():
@@ -23,8 +36,6 @@ class CMUDict():
     entries = parse(paths, silent)
 
     self._entries_arpa = entries
-    self._entries_ipa = self._convert_to_ipa(silent)
-    self._entries_first_ipa = self._extract_first_ipa()
     self._entries_first_arpa = self._extract_first_arpa()
     self._loaded = True
 
@@ -32,50 +43,49 @@ class CMUDict():
     if not self._loaded:
       raise Exception("Please load the dictionary first.")
 
-  def _extract_first_ipa(self) -> Dict[str, str]:
-    result: Dict[str, str] = {word: ipas[0] for word, ipas in self._entries_ipa.items()}
+  def _extract_first_arpa(self) -> Dict[Word, ARPAPronunciation]:
+    result: Dict[Word, ARPAPronunciation] = {
+      word: arpa_pronunciations[0] for word, arpa_pronunciations in self._entries_arpa.items()
+    }
     return result
 
-  def _extract_first_arpa(self) -> Dict[str, str]:
-    result: Dict[str, str] = {word: arpas[0] for word, arpas in self._entries_arpa.items()}
-    return result
-
-  def _convert_to_ipa(self, silent: bool) -> Dict[str, List[str]]:
-    result: Dict[str, List[str]] = {word: [] for word, _ in self._entries_arpa.items()}
-    arpa_pronunciations_to_words = self._entries_arpa.items() if silent else tqdm(self._entries_arpa.items())
-    for word, arpa_pronunciations_to_word in arpa_pronunciations_to_words:
-      for arpa_pronunciation in arpa_pronunciations_to_word:
-        phonemes = arpa_pronunciation.split(' ')
-        ipa_phonemes = [get_ipa_with_stress(phoneme) for phoneme in phonemes]
-        ipa = ''.join(ipa_phonemes)
-        result[word].append(ipa)
-    return result
-
-  def sentence_to_ipa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool = True) -> str:
-    self._ensure_data_is_loaded()
-    return get_ipa_of_sentence(self._entries_first_ipa, sentence, replace_unknown_with, use_caching)
-
-  def sentence_to_arpa(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool = True) -> str:
+  def sentence_to_arpa_old(self, sentence: str, replace_unknown_with: Optional[Union[str, Callable[[str], str]]], use_caching: bool = True) -> str:
+    assert sentence is not None
     self._ensure_data_is_loaded()
     return get_ipa_of_sentence(self._entries_first_arpa, sentence, replace_unknown_with, use_caching)
 
-  def contains(self, word: str) -> bool:
+  def sentence_to_arpa(self, sentence: str) -> ARPAPronunciation:
+    assert isinstance(sentence, str)
+    self._ensure_data_is_loaded()
+    tmp = []
+    for word in sentence.split(ENG_SPACE):
+      if self.contains(word):
+        arpa_pronunciation = self.get_first_arpa(word)
+        tmp.append(arpa_pronunciation)
+    return join_lists(tmp, join_with=[ARPA_SPACE])
+
+  def contains(self, word: Word) -> bool:
+    assert isinstance(word, str)
     self._ensure_data_is_loaded()
     result = word.upper() in self._entries_arpa.keys()
     return result
 
-  def get_first_ipa(self, word: str) -> str:
+  def get_first_arpa(self, word: Word) -> ARPAPronunciation:
+    assert isinstance(word, str)
     self._ensure_data_is_loaded()
-    return self._entries_first_ipa[word.upper()]
+    result = self._entries_first_arpa.get(word.upper(), None)
+    if result is None:
+      raise Exception(f"The word \"{word}\" was not in the dictionary!")
+    return result
 
-  def get_all_ipa(self, word: str) -> List[str]:
-    self._ensure_data_is_loaded()
-    return self._entries_ipa[word.upper()]
-
-  def get_all_arpa(self, word: str) -> List[str]:
+  def get_all_arpa(self, word: Word) -> ARPAPronunciations:
+    assert isinstance(word, str)
     '''Returns list of ARPAbet pronunciations of the given word.'''
     self._ensure_data_is_loaded()
-    return self._entries_arpa[word.upper()]
+    result = self._entries_arpa.get(word.upper(), None)
+    if result is None:
+      raise Exception(f"The word \"{word}\" was not in the dictionary!")
+    return result
 
   def __len__(self) -> int:
     return len(self._entries_arpa)

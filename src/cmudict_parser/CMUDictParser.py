@@ -10,13 +10,22 @@ from tqdm import tqdm
 ''' Regex for alternative pronunciation '''
 _alt_re = re.compile(r'\([0-9]+\)')
 
+WORD_AND_PRONUNCIATION_SEP = "  "
+ARPA_SYMBOL_SEPARATOR = " "
+
+Word = str
+ARPASymbol = str
+ARPAPronunciation = List[ARPASymbol]
+ARPAPronunciations = List[ARPAPronunciation]
+ARPADict = Dict[Word, ARPAPronunciations]
+
 
 def _read_lines(file: str) -> List[str]:
   with open(file, encoding='latin-1') as f:
     return f.readlines()
 
 
-def parse(paths: Tuple[str, str, str], silent: bool) -> Dict[str, List[str]]:
+def parse(paths: Tuple[str, str, str], silent: bool) -> ARPADict:
   symbols_path, _, dict_path = paths
 
   symbols_content = _read_lines(symbols_path)
@@ -30,8 +39,8 @@ def parse(paths: Tuple[str, str, str], silent: bool) -> Dict[str, List[str]]:
   return result
 
 
-def _parse_cmudict(lines: List[str], silent: bool) -> Dict[str, List[str]]:
-  result: Dict[str, List[str]] = dict()
+def _parse_cmudict(lines: List[str], silent: bool) -> ARPADict:
+  result: ARPADict = dict()
   data = lines if silent else tqdm(lines)
   for line in data:
     line_should_be_processed = _line_should_be_processed(line)
@@ -42,25 +51,26 @@ def _parse_cmudict(lines: List[str], silent: bool) -> Dict[str, List[str]]:
   return result
 
 
-def _process_line(line: str, cmudict: Dict[str, List[str]]) -> None:
-  word, pronunciation = _get_word_and_pronunciation(line)
+def _process_line(line: str, cmudict: ARPADict) -> None:
+  word, pronunciation_arpa = _get_word_and_pronunciation(line)
 
   if word not in cmudict:
     cmudict[word] = list()
 
-  cmudict[word].append(pronunciation)
+  cmudict[word].append(pronunciation_arpa)
 
 
-def _get_word_and_pronunciation(line: str) -> Tuple[str, str]:
-  parts = line.split('  ')
+def _get_word_and_pronunciation(line: str) -> Tuple[Word, ARPAPronunciation]:
+  parts = line.split(WORD_AND_PRONUNCIATION_SEP)
   word = parts[0]
   word = _remove_double_indicators(word)
   pronunciation = parts[1].strip()
+  pronunciation_arpa = pronunciation.split(ARPA_SYMBOL_SEPARATOR)
 
-  return word, pronunciation
+  return word, pronunciation_arpa
 
 
-def _remove_double_indicators(word: str) -> str:
+def _remove_double_indicators(word: Word) -> Word:
   ''' example: ABBE(1) => ABBE '''
   result = re.sub(_alt_re, '', word)
 
@@ -76,30 +86,28 @@ def _line_should_be_processed(line: str) -> bool:
   return result
 
 
-def _parse_symbols(lines: List[str]) -> Set[str]:
-  symbols: List[str] = []
+def _parse_symbols(lines: List[str]) -> Set[ARPASymbol]:
+  symbols: List[ARPASymbol] = []
 
   for line in lines:
     cleaned_line = line.strip()
     symbols.append(cleaned_line)
 
-  symbols_as_set: Set[str] = set(symbols)
+  symbols_as_set: Set[ARPASymbol] = set(symbols)
 
   return symbols_as_set
 
 
-def _check_have_unknown_symbols(entries: Dict[str, List[str]], _symbols: Set[str]) -> None:
+def _check_have_unknown_symbols(entries: ARPADict, symbols: Set[ARPASymbol]) -> None:
   for _, pronunciations in entries.items():
     for p in pronunciations:
-      _check_contains_no_unknown_symbols(p, _symbols)
+      _check_contains_no_unknown_symbols(p, symbols)
 
 
-def _check_contains_no_unknown_symbols(pronunciation: str, known_symbols: Set[str]) -> str:
-  parts = pronunciation.split(' ')
+def _check_contains_no_unknown_symbols(arpa_pronunciation: ARPAPronunciation, known_arpa_symbols: Set[ARPASymbol]) -> None:
+  for arpa_symbol in arpa_pronunciation:
+    is_unknown_arpa_symbol = arpa_symbol not in known_arpa_symbols
 
-  for part in parts:
-    is_unknown_symbol = part not in known_symbols
-
-    if is_unknown_symbol:
+    if is_unknown_arpa_symbol:
       # CMUs fault: unknown symbol exist in dict
       raise Exception("The dictionary contains symbols which were not in the symbols-file!")
