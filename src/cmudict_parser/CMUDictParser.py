@@ -25,18 +25,18 @@ def _read_lines(file: str) -> List[str]:
     return f.readlines()
 
 
-def parse(paths: Tuple[str, str, str], silent: bool) -> ARPADict:
+def parse(paths: Tuple[str, str, str], silent: bool) -> Tuple[ARPADict, Set[ARPASymbol]]:
   symbols_path, _, dict_path = paths
 
   symbols_content = _read_lines(symbols_path)
-  symbols = _parse_symbols(symbols_content)
+  all_arpa_symbols = _parse_symbols(symbols_content)
 
   dict_content = _read_lines(dict_path)
   result = _parse_cmudict(dict_content, silent)
 
-  _check_have_unknown_symbols(result, symbols)
+  _check_have_unknown_symbols(result, all_arpa_symbols)
 
-  return result
+  return result, all_arpa_symbols
 
 
 def _parse_cmudict(lines: List[str], silent: bool) -> ARPADict:

@@ -3,16 +3,18 @@ Remarks:
 https://github.com/cmusphinx/cmudict is newer than 0.7b! It has for example 'declarative' but is has unfortunately no MIT-license.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from cmudict_parser.CMUDictDownloader import ensure_files_are_downloaded
 from cmudict_parser.CMUDictParser import (ARPAPronunciation,
-                                          ARPAPronunciations, Word, parse)
+                                          ARPAPronunciations, ARPASymbol, Word,
+                                          parse)
 from cmudict_parser.SentenceToIPA import sentence_to_ipa as get_ipa_of_sentence
 
 ENG_SPACE = " "
 ARPA_SPACE = " "
 ARPA_UNKNOWN = "<UNK>"
+ARPA_ALLOWED_PUNCTUATION = {"!", "?", ".", ",", ";", "\"", "'", "-"}
 
 
 def join_lists(lists: List[List[Any]], join_with: List[Any]) -> List[Any]:
@@ -34,11 +36,16 @@ class CMUDict():
   def _load(self, dictionary_dir: str, silent: bool) -> None:
     self._loaded = False
     paths = ensure_files_are_downloaded(dictionary_dir)
-    entries = parse(paths, silent)
+    entries, all_arpa_symbols = parse(paths, silent)
+    self._all_symbols = all_arpa_symbols
 
     self._entries_arpa = entries
     self._entries_first_arpa = self._extract_first_arpa()
     self._loaded = True
+
+  @property()
+  def all_phoneme_symbols(self) -> Set[ARPASymbol]:
+    return self._all_symbols
 
   def _ensure_data_is_loaded(self) -> None:
     if not self._loaded:
