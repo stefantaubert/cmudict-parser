@@ -43,7 +43,7 @@ class CMUDict():
     self._entries_first_arpa = self._extract_first_arpa()
     self._loaded = True
 
-  @property()
+  @property
   def all_phoneme_symbols(self) -> Set[ARPASymbol]:
     return self._all_symbols
 
